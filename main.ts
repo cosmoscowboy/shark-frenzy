@@ -63,6 +63,12 @@ function startGame () {
     hunter.y = waves[0].bottom
     takingAir = true
 }
+statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 10, function (status) {
+    scene.cameraShake(4, 500)
+})
+statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 30, function (status) {
+    scene.cameraShake(4, 500)
+})
 function adjustScene () {
     for (let aWave of sprites.allOfKind(SpriteKind.Wave)) {
         if (aWave.left > scene.screenWidth()) {
