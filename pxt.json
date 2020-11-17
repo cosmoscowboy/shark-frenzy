@@ -2,7 +2,14 @@
     "name": "Shark frenzy",
     "description": "",
     "dependencies": {
-        "device": "*"
+        "device": "*",
+        "Timers": "github:microsoft/arcade-timers#v1.1.0",
+        "pxt-status-bar": "github:jwunderl/pxt-status-bar#v0.3.1",
+        "animation": "*",
+        "character-animations": "github:riknoll/character-animations#v0.3.0",
+        "arcade-sprite-util": "github:jwunderl/arcade-sprite-util#v0.0.9",
+        "Color Fading": "github:jwunderl/pxt-color#v0.2.0",
+        "arcade-sprite-data": "github:microsoft/arcade-sprite-data#v0.1.0"
     },
     "files": [
         "main.blocks",

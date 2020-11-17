@@ -5,6 +5,8 @@ namespace SpriteKind {
 function setPlayer () {
     swimmingSpeedX = 30
     swimmingSpeedY = 20
+    lastTimeNotTakingAir = game.runtime()
+    milliSecondsPer10Air = 1500
     hunter = sprites.create(img`
         ........................
         ..............fff.......
@@ -32,6 +34,8 @@ function setPlayer () {
         ........................
         `, SpriteKind.Player)
     hunter.setPosition(scene.screenWidth() - hunter.width, scene.screenHeight() / 2)
+    air = statusbars.create(20, 4, StatusBarKind.Health)
+    air.attachToSprite(hunter, 5, 5)
 }
 function startGame () {
     controller.moveSprite(hunter, swimmingSpeedX, swimmingSpeedY)
@@ -55,8 +59,23 @@ function adjustScene () {
             aCoralReef.right = 0
         }
     }
+}
+function checkBreathing () {
     if (hunter.y < waves[0].bottom) {
         hunter.y = waves[0].bottom
+        takingAir = true
+        lastTimeNotTakingAir = game.runtime()
+        air.value = 100
+    } else if (hunter.bottom > scene.screenHeight()) {
+        hunter.bottom = scene.screenHeight()
+    } else if (hunter.top > waves[0].bottom) {
+        takingAir = false
+    }
+    if (!(takingAir)) {
+        if (lastTimeNotTakingAir + milliSecondsPer10Air < game.runtime()) {
+            air.value += -10
+            lastTimeNotTakingAir = game.runtime()
+        }
     }
 }
 function setScene () {
@@ -252,7 +271,10 @@ let coralSpeed = 0
 let coralReefs: Sprite[] = []
 let waveSpeed = 0
 let waves: Sprite[] = []
+let air: StatusBarSprite = null
 let hunter: Sprite = null
+let milliSecondsPer10Air = 0
+let lastTimeNotTakingAir = 0
 let swimmingSpeedY = 0
 let swimmingSpeedX = 0
 setScene()
@@ -260,4 +282,5 @@ setPlayer()
 startGame()
 game.onUpdate(function () {
     adjustScene()
+    checkBreathing()
 })
