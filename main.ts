@@ -6,10 +6,8 @@ function adjustSceneSpriteSpeed (sceneSprite: Sprite, spriteSpeed: number) {
     sceneIncreaseSpeed = hunter.vx / swimmingSpeedX / 2
     if (sceneIncreaseSpeed == 0) {
         sceneSprite.vx = spriteSpeed
-    } else if (sceneIncreaseSpeed < 0) {
-        sceneSprite.vx = spriteSpeed - spriteSpeed * sceneIncreaseSpeed
     } else {
-        sceneSprite.vx = spriteSpeed - spriteSpeed * sceneIncreaseSpeed
+        sceneSprite.vx = spriteSpeed + spriteSpeed * sceneIncreaseSpeed
     }
 }
 function setPlayer () {
@@ -20,21 +18,21 @@ function setPlayer () {
     milliSecondsPer10Air = 1500
     hunter = sprites.create(img`
         ........................
-        ..............fff.......
-        .............f2fffff....
-        ...........ff22eeeeeff..
-        ..........ff222eeeeeeff.
-        ..........feeeefffeeeef.
-        .........fe2222eeefffff.
-        .........f2efffff222efff
-        ..cc.....fffeeefffffffff
-        ..cdcc...fee44fbbe44efef
-        ..ccddcc..feddfbb4d4eef.
-        ....cdddceefddddd4eeef..
-        .....ccdcddee2222222f...
-        ......cccdd44e544444f...
-        .........eeeeffffffff...
-        .............ff...fff...
+        .......fff..............
+        ....fffff2f.............
+        ..ffeeeee22ff...........
+        .ffeeeeee222ff..........
+        .feeeefffeeeef..........
+        .fffffeee2222ef.........
+        fffe222fffffe2f.........
+        fffffffffeeefff.....cc..
+        fefe44ebbf44eef...ccdc..
+        .fee4d4bbfddef..ccddcc..
+        ..feee4dddddfeecdddc....
+        ...f2222222eeddcdcc.....
+        ...f444445e44ddccc......
+        ...ffffffffeeee.........
+        ...fff...ff.............
         ........................
         ........................
         ........................
@@ -46,21 +44,12 @@ function setPlayer () {
         `, SpriteKind.Player)
     hunter.setFlag(SpriteFlag.StayInScreen, true)
     hunter.setFlag(SpriteFlag.ShowPhysics, true)
-    hunter.setPosition(scene.screenWidth() - hunter.width, scene.screenHeight() / 2)
+    hunter.setPosition(0, scene.screenHeight() / 2)
+    controller.moveSprite(hunter, swimmingSpeedX, swimmingSpeedY)
     air = statusbars.create(20, 4, StatusBarKind.Health)
     air.attachToSprite(hunter, 5, 5)
     air.setFlag(SpriteFlag.Invisible, false)
-    blockObject.storeOnSprite(blockObject.create(), hunter)
-}
-function startGame () {
-    controller.moveSprite(hunter, swimmingSpeedX, swimmingSpeedY)
-    for (let aWave of waves) {
-        aWave.vx = waveSpeed
-    }
-    for (let aCoralReef of coralReefs) {
-        aCoralReef.vx = coralSpeed
-    }
-    hunter.y = waves[0].bottom
+    hunter.y = yMin
     takingAir = true
 }
 statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 10, function (status) {
@@ -71,28 +60,28 @@ statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ,
 })
 function adjustScene () {
     for (let aWave of sprites.allOfKind(SpriteKind.Wave)) {
-        if (aWave.left > scene.screenWidth()) {
-            aWave.right = 0
+        if (aWave.right < 0) {
+            aWave.left = scene.screenWidth()
         }
         adjustSceneSpriteSpeed(aWave, waveSpeed)
     }
     for (let aCoralReef of sprites.allOfKind(SpriteKind.Coral)) {
-        if (aCoralReef.left > scene.screenWidth()) {
-            aCoralReef.right = 0
+        if (aCoralReef.right < 0) {
+            aCoralReef.left = scene.screenWidth()
         }
         adjustSceneSpriteSpeed(aCoralReef, coralSpeed)
     }
-    if (hunter.x < scene.screenWidth() / 3) {
-        hunter.x = scene.screenWidth() / 3
+    if (hunter.x > scene.screenWidth() - scene.screenWidth() / 3) {
+        hunter.x = scene.screenWidth() - scene.screenWidth() / 3
     }
 }
 function checkBreathing () {
-    if (hunter.y < waves[0].bottom) {
-        hunter.y = waves[0].bottom
+    if (hunter.y < yMin) {
+        hunter.y = yMin
         takingAir = true
         lastTimeNotTakingAir = game.runtime()
         air.value = 100
-    } else if (hunter.top > waves[0].bottom) {
+    } else if (hunter.y > yMin + 2) {
         takingAir = false
     }
     if (!(takingAir)) {
@@ -100,6 +89,34 @@ function checkBreathing () {
             air.value += -10
             lastTimeNotTakingAir = game.runtime()
         }
+    }
+}
+function spawnEnemies () {
+    if (nextTimeToSpawnEnemies < game.runtime()) {
+        nextTimeToSpawnEnemies = getNextSpawnTime()
+        aShark = sprites.create(img`
+            .............ccfff..............
+            ...........ccddbcf..............
+            ..........ccddbbf...............
+            ..........fccbbcf...............
+            .....fffffccccccff.........ccc..
+            ...ffbbbbbbbcbbbbcfff....ccbbc..
+            ..fbbbbbbbbcbcbbbbcccff.cdbbc...
+            ffbbbbbbffbbcbcbbbcccccfcdbbf...
+            fbcbbb11ff1bcbbbbbcccccffbbf....
+            fbbb11111111bbbbbcccccccbbcf....
+            .fb11133cc11bbbbcccccccccccf....
+            ..fccc31c111bbbcccccbdbffbbcf...
+            ...fc13c111cbbbfcddddcc..fbbf...
+            ....fccc111fbdbbccdcc.....fbbf..
+            ........ccccfcdbbcc........fff..
+            .............fffff..............
+            `, SpriteKind.Enemy)
+        aShark.left = scene.screenWidth() - 5
+        aShark.top = randint(yMin, scene.screenHeight() - aShark.height)
+        aShark.vx = randint(sharkSpeedXMin, sharkSpeedXMax)
+        aShark.setFlag(SpriteFlag.AutoDestroy, true)
+        aShark.z = aShark.y
     }
 }
 function setScene () {
@@ -225,7 +242,7 @@ function setScene () {
         cccc887ccccccccc88ccccccc78ccccccc888888888cccccccccccc8888888ccccccc8888888cccccccccccc8888ccccccccc8cccccccccc888cccccccc888888ccccccccc8cccccccc888888ccccccc
         ccc88878ccccc88888cccccc7788ccccc8888888888ccccccccc8888888888cccccc88888888cccccccccccc88888ccccccccccccccccccc8888ccccccc8888888cccccccc8ccccccccc88888ccccccc
         `)
-    waveSpeed = 7.5
+    waveSpeed = -7.5
     waveImages = [img`
         9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
         9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
@@ -252,10 +269,11 @@ function setScene () {
         aWave = sprites.create(waveImages[index], SpriteKind.Wave)
         aWave.setFlag(SpriteFlag.Ghost, true)
         aWave.top = 17
-        aWave.left = 0 - scene.screenWidth() * index
+        aWave.left = 0 + scene.screenWidth() * index
         waves.push(aWave)
     }
-    coralSpeed = 3
+    yMin = waves[0].bottom
+    coralSpeed = -3
     coralImages = [img`
         8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
         8888877788888888888888888888888888888888888888888888888888888888888888888888888878888888888888888888888888888888888888888888888888888888888888888888888888888888
@@ -296,19 +314,41 @@ function setScene () {
         aCoralReef = sprites.create(coralImages[index], SpriteKind.Coral)
         aCoralReef.setFlag(SpriteFlag.Ghost, true)
         aCoralReef.bottom = scene.screenHeight()
-        aCoralReef.left = 0 - scene.screenWidth() * index
+        aCoralReef.left = 0 + scene.screenWidth() * index
         coralReefs.push(aCoralReef)
     }
 }
+function setEnemies () {
+    spawnTimeMin = 1500
+    spawnTimeMax = 5000
+    nextTimeToSpawnEnemies = getNextSpawnTime()
+    sharkSpeedXMin = -10
+    sharkSpeedXMax = -30
+}
+function getNextSpawnTime () {
+    return game.runtime() + randint(spawnTimeMin, spawnTimeMin)
+}
+function setGame () {
+    setScene()
+    setPlayer()
+    setEnemies()
+}
+let spawnTimeMax = 0
+let spawnTimeMin = 0
 let aCoralReef: Sprite = null
+let coralReefs: Sprite[] = []
 let coralImages: Image[] = []
 let aWave: Sprite = null
-let waveImages: Image[] = []
-let takingAir = false
-let coralSpeed = 0
-let coralReefs: Sprite[] = []
-let waveSpeed = 0
 let waves: Sprite[] = []
+let waveImages: Image[] = []
+let sharkSpeedXMax = 0
+let sharkSpeedXMin = 0
+let aShark: Sprite = null
+let nextTimeToSpawnEnemies = 0
+let coralSpeed = 0
+let waveSpeed = 0
+let takingAir = false
+let yMin = 0
 let air: StatusBarSprite = null
 let milliSecondsPer10Air = 0
 let lastTimeNotTakingAir = 0
@@ -316,10 +356,9 @@ let swimmingSpeedY = 0
 let swimmingSpeedX = 0
 let hunter: Sprite = null
 let sceneIncreaseSpeed = 0
-setScene()
-setPlayer()
-startGame()
+setGame()
 game.onUpdate(function () {
     adjustScene()
     checkBreathing()
+    spawnEnemies()
 })
