@@ -2,8 +2,205 @@ namespace SpriteKind {
     export const Wave = SpriteKind.create()
     export const Coral = SpriteKind.create()
 }
+function setSharkProperties () {
+    sharkImagesLeft = [img`
+        .............ccfff..............
+        ...........ccddbcf..............
+        ..........ccddbbf...............
+        ..........fccbbcf...............
+        .....fffffccccccff.........ccc..
+        ...ffbbbbbbbcbbbbcfff....ccbbc..
+        ..fbbbbbbbbcbcbbbbcccff.cdbbc...
+        ffbbbbbbffbbcbcbbbcccccfcdbbf...
+        fbcbbb11ff1bcbbbbbcccccffbbf....
+        fbbb11111111bbbbbcccccccbbcf....
+        .fb11133cc11bbbbcccccccccccf....
+        ..fccc31c111bbbcccccbdbffbbcf...
+        ...fc13c111cbbbfcddddcc..fbbf...
+        ....fccc111fbdbbccdcc.....fbbf..
+        ........ccccfcdbbcc........fff..
+        .............fffff..............
+        `, img`
+        .............ccfff..............
+        ............cddbbf..............
+        ...........cddbbf...............
+        ..........fccbbcf............ccc
+        ....ffffffccccccff.........ccbbc
+        ..ffbbbbbbbbbbbbbcfff.....cdbbc.
+        ffbbbbbbbbbcbcbbbbcccff..cddbbf.
+        fbcbbbbbffbbcbcbbbcccccfffdbbf..
+        fbbb1111ff1bcbcbbbcccccccbbbcf..
+        .fb11111111bbbbbbcccccccccbccf..
+        ..fccc33cc11bbbbccccccccfffbbcf.
+        ...fc131c111bbbcccccbdbc...fbbf.
+        ....f33c111cbbbfdddddcc.....fbbf
+        .....ff1111fbdbbfddcc........fff
+        .......cccccfbdbbfc.............
+        .............fffff..............
+        `, img`
+        ..............cfff..............
+        ............ccddbf..............
+        ...........cbddbff.........ccc..
+        ..........fccbbcf.........cbbc..
+        ...fffffffccccccff.......cdbc...
+        .ffcbbbbbbbbbbbbbcfff....cdbf...
+        fcbbbbbbbbbcbbbbbbcccff.cdbf....
+        fbcbbbbffbbbcbcbbbcccccffdcf....
+        fbb1111ffbbbcbcbbbccccccbbcf....
+        .fb11111111bbcbbbccccccccbbcf...
+        ..fccc33cb11bbbbcccccccfffbbf...
+        ...fc131c111bbbcccccbdbc..fbbf..
+        ....f33c111cbbccdddddbc....fff..
+        .....ff1111fdbbccddbcc..........
+        .......cccccfdbbbfcc............
+        .............fffff..............
+        `, img`
+        .............ccfff..............
+        ............cddbbf..............
+        ...........cddbbf...............
+        ..........fccbbcf............ccc
+        ....ffffffccccccff.........ccbbc
+        ..ffbbbbbbbbbbbbbcfff.....cdbbc.
+        ffbbbbbbbbbcbcbbbbcccff..cddbbf.
+        fbcbbbbbffbbcbcbbbcccccfffdbbf..
+        fbbb1111ff1bcbcbbbcccccccbbbcf..
+        .fb11111111bbbbbbcccccccccbccf..
+        ..fccc33cc11bbbbccccccccfffbbcf.
+        ...fc131c111bbbcccccbdbc...fbbf.
+        ....f33c111cbbbfdddddcc.....fbbf
+        .....ff1111fbdbbfddcc........fff
+        .......cccccfbdbbfc.............
+        .............fffff..............
+        `]
+    sharkImagesRight = []
+    sharkAttackImagesLeft = [
+    img`
+        .................ccfff..............
+        ................cddbbf..............
+        ...............cddbbf...............
+        ..............fccbbcf............ccc
+        ........ffffffccccccff.........ccbbc
+        ......ffbbbbbbbbbbbbbcfff.....cdbbc.
+        ....ffbbbbbbbbbcbcbbbbcccff..cddbbf.
+        ....fbcbbbbbffbbcbcbbbcccccfffdbbf..
+        ....fbbb1111ff1bcbcbbbcccccccbbbcf..
+        .....fb11111111bbbbbbcccccccccbccf..
+        ......fccc33cc11bbbbccccccccfffbbcf.
+        .......fc131c111bbbcccccbdbc...fbbf.
+        ........f33c111cbbbfdddddcc.....fbbf
+        .........ff1111fbdbbfddcc........fff
+        ...........cccccfbdbbfc.............
+        .................fffff..............
+        `,
+    img`
+        .................ccfff..............
+        ................cddbbf..............
+        ...............cddbbf...............
+        .........ffffffccbbcf...............
+        ......fffbbbbbbbbcccff..............
+        .....fbbbbbbbbbbbbbbbcfff......ccccc
+        .....bcbbbbbffbcbcbbbbcccff...cdbbbc
+        .....bbb1111ffbbcbcbbbcccccffcddbbc.
+        .....fb11111111bcbcbbbcccccccbdbbf..
+        ......fccc33c11bbbbbbcccccccccbbcf..
+        .......fc131cc11bbbbccccccccffbccf..
+        ........f33c1111bbbcccccbdbc..fbbcf.
+        .........ff1111cbbbfdddddcc....fbbf.
+        ...........ccc1fbdbbfddcc.......fbbf
+        ..............ccfbdbbfc..........fff
+        .................fffff..............
+        `,
+    img`
+        ..................ccfff.............
+        .................cddbbf.............
+        ........fffffffffddbbf..............
+        .......fbbbbbbbbbfcbcf..............
+        .......fbbc111bffbbccffff...........
+        .......fb111111ffbbbbbcccff....ccccc
+        ........f1cc3311bbcbcbbccccf..cdbbbc
+        ........fcc131c1bbbcbcbcccccfcddbbc.
+        .........f111111bbbcbcbccccccbdbbf..
+        .........f1111111bbbbbccccccccbbcf..
+        ..........f111111bbbbcccccccffbccf..
+        ...........c1111cbbbcccccbdbc.fbbcf.
+        ............cc11cbbbfddddddc...fbbf.
+        ..............cffbdbbfdddcc.....fbbf
+        .................fbdbbfcc........fff
+        ..................fffff.............
+        `,
+    img`
+        ....................ccfff...........
+        ..........fffffffffcbbbbf...........
+        .........fbbbbbbbbbfffbf............
+        .........fbb111bffbbbbff............
+        .........fb11111ffbbbbbcff..........
+        .........f1cccc11bbcbcbcccf.........
+        ..........fc1c1c1bbbcbcbcccf...ccccc
+        ............c3331bbbcbcbccccfccddbbc
+        ...........c333c1bbbbbbbcccccbddbcc.
+        ...........c331c11bbbbbcccccccbbcc..
+        ..........cc13c111bbbbccccccffbccf..
+        ..........c111111cbbbcccccbbc.fccf..
+        ...........cc1111cbbbfdddddc..fbbcf.
+        .............cccffbdbbfdddc....fbbf.
+        ..................fbdbbfcc......fbbf
+        ...................fffff.........fff
+        `,
+    img`
+        ...........fffffff...ccfff..........
+        ..........fbbbbbbbffcbbbbf..........
+        ..........fbb111bbbbbffbf...........
+        ..........fb11111ffbbbbff...........
+        ..........f1cccc1ffbbbbbcff.........
+        ..........ffc1c1c1bbcbcbcccf........
+        ...........fcc3331bbbcbcbcccf..ccccc
+        ............c333c1bbbcbcbccccfcddbbc
+        ............c333c1bbbbbbbcccccddbcc.
+        ............c333c11bbbbbccccccbbcc..
+        ...........cc331c11bbbbccccccfbccf..
+        ...........cc13c11cbbbcccccbbcfccf..
+        ...........c111111cbbbfdddddc.fbbcf.
+        ............cc1111fbdbbfdddc...fbbf.
+        ..............cccfffbdbbfcc.....fbbf
+        ....................fffff........fff
+        `,
+    img`
+        ....................................
+        ....................................
+        ....................................
+        ...............ccffff...............
+        ..............cddbbbf...............
+        .......ffffffcddbbbf................
+        .....ffbbbbbbbbbbbbbcfff.......ccccc
+        ...ffbbbbbbbbcbcbbbbbcccff....cdbbbc
+        ..fbbbbbbbbbbcbbcbbbbcccccfffcddbbc.
+        .fbcbbbbbbbbbbcbcbbbbccccccccbdbbf..
+        .fbbbbbbbfffbbcbbbbbccccccccccbbcf..
+        .ffbb1111fffbbcbbbbcccccccbcffbccf..
+        ..ff111111111bbbbccccccbbbcc..fbbcf.
+        ....ccccccc111bdbbbfddbccc.....ffbbf
+        ........ccccccfbdbbbfcc..........fff
+        ...............ffffff...............
+        `
+    ]
+    sharkAttackImagesRight = []
+    for (let index = 0; index <= sharkImagesLeft.length - 1; index++) {
+        anImage = sharkImagesLeft[index].clone()
+        anImage.flipX()
+        sharkImagesRight[index] = anImage
+    }
+    for (let index = 0; index <= sharkAttackImagesLeft.length - 1; index++) {
+        anImage = sharkAttackImagesLeft[index].clone()
+        anImage.flipX()
+        sharkAttackImagesRight[index] = anImage
+    }
+    sharkIsAttacking = "dataSharkIsAttacking"
+    sharkNextAttackTime = "dataSharkNextAttackTime"
+    sharkAttackMin = 1000
+    sharkAttackMax = 3000
+    sharkAnimationSpeed = 200
+}
 function adjustSceneSpriteSpeed (sceneSprite: Sprite, spriteSpeed: number) {
-    sceneIncreaseSpeed = 0 / swimmingSpeedX / 2
     if (hunter.vx == 0) {
         sceneSprite.vx = 0
     } else if (hunter.vx > 0) {
@@ -16,8 +213,8 @@ function setPlayer () {
     setPlayerVariables()
     hunter = sprites.create(swimmingImagesRight[0], SpriteKind.Player)
     hunter.setFlag(SpriteFlag.StayInScreen, true)
-    hunter.setFlag(SpriteFlag.ShowPhysics, true)
-    hunter.setPosition(0, scene.screenHeight() / 2)
+    hunter.setFlag(SpriteFlag.ShowPhysics, false)
+    hunter.setPosition(scene.screenWidth() / 2, scene.screenHeight() / 2)
     controller.moveSprite(hunter, swimmingSpeedX, swimmingSpeedY)
     air = statusbars.create(20, 4, StatusBarKind.Health)
     air.attachToSprite(hunter, 5, 5)
@@ -27,7 +224,7 @@ function setPlayer () {
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (!(attacking)) {
-        attack()
+        hunterAttacks()
     }
 })
 statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 10, function (status) {
@@ -35,6 +232,17 @@ statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ,
 })
 statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 30, function (status) {
     scene.cameraShake(4, 500)
+})
+function getSharkAnimationSpeed (aShark: Sprite) {
+    aSharkSpeed = Math.abs(aShark.vx)
+    aSharkAnimationSpeed = sharkAnimationSpeed
+    if (aSharkSpeed < sharkSpeedXMax) {
+        aSharkAnimationSpeed = sharkAnimationSpeed + sharkAnimationSpeed * (aSharkSpeed / sharkSpeedXMax)
+    }
+    return aSharkAnimationSpeed
+}
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    facingRight = false
 })
 function adjustScene () {
     for (let aWave of sprites.allOfKind(SpriteKind.Wave)) {
@@ -69,21 +277,9 @@ function checkBreathing () {
     }
     hunter.z = hunter.y
 }
-function attack () {
-    attacking = true
-    character.setCharacterAnimationsEnabled(hunter, false)
-    animation.runImageAnimation(
-    hunter,
-    attackingImagesRight,
-    200,
-    false
-    )
-    timer.after(500, function () {
-        attacking = false
-        hunter.setImage(swimmingImagesRight[0])
-        character.setCharacterAnimationsEnabled(hunter, true)
-    })
-}
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    facingRight = true
+})
 function spawnEnemies () {
     if (nextTimeToSpawnEnemies < game.runtime()) {
         nextTimeToSpawnEnemies = getNextSpawnTime()
@@ -91,23 +287,49 @@ function spawnEnemies () {
         aShark.top = randint(yMin, scene.screenHeight() - aShark.height)
         aShark.setFlag(SpriteFlag.AutoDestroy, true)
         aShark.z = aShark.y
+        sprites.setDataBoolean(aShark, sharkIsAttacking, false)
+        sprites.setDataNumber(aShark, sharkNextAttackTime, game.runtime() + randint(sharkAttackMin, sharkAttackMax))
         if (Math.percentChance(50)) {
             aShark.left = scene.screenWidth() - 5
+            aShark.vx = 0 - randint(sharkSpeedXMin, sharkSpeedXMax)
+        } else {
+            aShark.right = 5
             aShark.vx = randint(sharkSpeedXMin, sharkSpeedXMax)
+            aShark.setImage(sharkImagesRight[0])
+        }
+        setSharkAnimation(aShark, false)
+    }
+}
+function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
+    if (aShark.vx < 0) {
+        if (isAttacking) {
             animation.runImageAnimation(
             aShark,
-            sharkImagesLeft,
-            200,
+            sharkAttackImagesLeft,
+            getSharkAnimationSpeed(aShark),
             true
             )
         } else {
-            aShark.right = 5
-            aShark.vx = 0 - randint(sharkSpeedXMin, sharkSpeedXMax)
-            aShark.setImage(sharkImagesRight[0])
+            animation.runImageAnimation(
+            aShark,
+            sharkImagesLeft,
+            getSharkAnimationSpeed(aShark),
+            true
+            )
+        }
+    } else {
+        if (isAttacking) {
             animation.runImageAnimation(
             aShark,
             sharkAttackImagesRight,
-            200,
+            getSharkAnimationSpeed(aShark),
+            true
+            )
+        } else {
+            animation.runImageAnimation(
+            aShark,
+            sharkImagesRight,
+            getSharkAnimationSpeed(aShark),
             true
             )
         }
@@ -312,13 +534,20 @@ function setScene () {
         coralReefs.push(aCoralReef2)
     }
 }
+function sharksAttack () {
+    for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
+        if (true) {
+        	
+        }
+    }
+}
 function setEnemies () {
     spawnTimeMin = 1500
     spawnTimeMax = 5000
     nextTimeToSpawnEnemies = getNextSpawnTime()
-    sharkSpeedXMin = -10
-    sharkSpeedXMax = -30
-    setSharkImages()
+    sharkSpeedXMin = 12
+    sharkSpeedXMax = 22
+    setSharkProperties()
 }
 function setPlayerAnimations () {
     character.loopFrames(
@@ -334,6 +563,35 @@ function setPlayerAnimations () {
     character.rule(Predicate.MovingLeft)
     )
 }
+function hunterAttacks () {
+    attacking = true
+    character.setCharacterAnimationsEnabled(hunter, false)
+    if (facingRight) {
+        animation.runImageAnimation(
+        hunter,
+        attackingImagesRight,
+        200,
+        false
+        )
+        timer.after(500, function () {
+            attacking = false
+            hunter.setImage(swimmingImagesRight[0])
+            character.setCharacterAnimationsEnabled(hunter, true)
+        })
+    } else {
+        animation.runImageAnimation(
+        hunter,
+        attackingImagesLeft,
+        200,
+        false
+        )
+        timer.after(500, function () {
+            attacking = false
+            hunter.setImage(swimmingImagesLeft[0])
+            character.setCharacterAnimationsEnabled(hunter, true)
+        })
+    }
+}
 function getNextSpawnTime () {
     return game.runtime() + randint(spawnTimeMin, spawnTimeMin)
 }
@@ -341,199 +599,6 @@ function setGame () {
     setScene()
     setPlayer()
     setEnemies()
-}
-function setSharkImages () {
-    sharkImagesLeft = [img`
-        .............ccfff..............
-        ...........ccddbcf..............
-        ..........ccddbbf...............
-        ..........fccbbcf...............
-        .....fffffccccccff.........ccc..
-        ...ffbbbbbbbcbbbbcfff....ccbbc..
-        ..fbbbbbbbbcbcbbbbcccff.cdbbc...
-        ffbbbbbbffbbcbcbbbcccccfcdbbf...
-        fbcbbb11ff1bcbbbbbcccccffbbf....
-        fbbb11111111bbbbbcccccccbbcf....
-        .fb11133cc11bbbbcccccccccccf....
-        ..fccc31c111bbbcccccbdbffbbcf...
-        ...fc13c111cbbbfcddddcc..fbbf...
-        ....fccc111fbdbbccdcc.....fbbf..
-        ........ccccfcdbbcc........fff..
-        .............fffff..............
-        `, img`
-        .............ccfff..............
-        ............cddbbf..............
-        ...........cddbbf...............
-        ..........fccbbcf............ccc
-        ....ffffffccccccff.........ccbbc
-        ..ffbbbbbbbbbbbbbcfff.....cdbbc.
-        ffbbbbbbbbbcbcbbbbcccff..cddbbf.
-        fbcbbbbbffbbcbcbbbcccccfffdbbf..
-        fbbb1111ff1bcbcbbbcccccccbbbcf..
-        .fb11111111bbbbbbcccccccccbccf..
-        ..fccc33cc11bbbbccccccccfffbbcf.
-        ...fc131c111bbbcccccbdbc...fbbf.
-        ....f33c111cbbbfdddddcc.....fbbf
-        .....ff1111fbdbbfddcc........fff
-        .......cccccfbdbbfc.............
-        .............fffff..............
-        `, img`
-        ..............cfff..............
-        ............ccddbf..............
-        ...........cbddbff.........ccc..
-        ..........fccbbcf.........cbbc..
-        ...fffffffccccccff.......cdbc...
-        .ffcbbbbbbbbbbbbbcfff....cdbf...
-        fcbbbbbbbbbcbbbbbbcccff.cdbf....
-        fbcbbbbffbbbcbcbbbcccccffdcf....
-        fbb1111ffbbbcbcbbbccccccbbcf....
-        .fb11111111bbcbbbccccccccbbcf...
-        ..fccc33cb11bbbbcccccccfffbbf...
-        ...fc131c111bbbcccccbdbc..fbbf..
-        ....f33c111cbbccdddddbc....fff..
-        .....ff1111fdbbccddbcc..........
-        .......cccccfdbbbfcc............
-        .............fffff..............
-        `, img`
-        .............ccfff..............
-        ............cddbbf..............
-        ...........cddbbf...............
-        ..........fccbbcf............ccc
-        ....ffffffccccccff.........ccbbc
-        ..ffbbbbbbbbbbbbbcfff.....cdbbc.
-        ffbbbbbbbbbcbcbbbbcccff..cddbbf.
-        fbcbbbbbffbbcbcbbbcccccfffdbbf..
-        fbbb1111ff1bcbcbbbcccccccbbbcf..
-        .fb11111111bbbbbbcccccccccbccf..
-        ..fccc33cc11bbbbccccccccfffbbcf.
-        ...fc131c111bbbcccccbdbc...fbbf.
-        ....f33c111cbbbfdddddcc.....fbbf
-        .....ff1111fbdbbfddcc........fff
-        .......cccccfbdbbfc.............
-        .............fffff..............
-        `]
-    sharkImagesRight = []
-    sharkAttackImagesLeft = [
-    img`
-        .................ccfff..............
-        ................cddbbf..............
-        ...............cddbbf...............
-        ..............fccbbcf............ccc
-        ........ffffffccccccff.........ccbbc
-        ......ffbbbbbbbbbbbbbcfff.....cdbbc.
-        ....ffbbbbbbbbbcbcbbbbcccff..cddbbf.
-        ....fbcbbbbbffbbcbcbbbcccccfffdbbf..
-        ....fbbb1111ff1bcbcbbbcccccccbbbcf..
-        .....fb11111111bbbbbbcccccccccbccf..
-        ......fccc33cc11bbbbccccccccfffbbcf.
-        .......fc131c111bbbcccccbdbc...fbbf.
-        ........f33c111cbbbfdddddcc.....fbbf
-        .........ff1111fbdbbfddcc........fff
-        ...........cccccfbdbbfc.............
-        .................fffff..............
-        `,
-    img`
-        .................ccfff..............
-        ................cddbbf..............
-        ...............cddbbf...............
-        .........ffffffccbbcf...............
-        ......fffbbbbbbbbcccff..............
-        .....fbbbbbbbbbbbbbbbcfff......ccccc
-        .....bcbbbbbffbcbcbbbbcccff...cdbbbc
-        .....bbb1111ffbbcbcbbbcccccffcddbbc.
-        .....fb11111111bcbcbbbcccccccbdbbf..
-        ......fccc33c11bbbbbbcccccccccbbcf..
-        .......fc131cc11bbbbccccccccffbccf..
-        ........f33c1111bbbcccccbdbc..fbbcf.
-        .........ff1111cbbbfdddddcc....fbbf.
-        ...........ccc1fbdbbfddcc.......fbbf
-        ..............ccfbdbbfc..........fff
-        .................fffff..............
-        `,
-    img`
-        ..................ccfff.............
-        .................cddbbf.............
-        ........fffffffffddbbf..............
-        .......fbbbbbbbbbfcbcf..............
-        .......fbbc111bffbbccffff...........
-        .......fb111111ffbbbbbcccff....ccccc
-        ........f1cc3311bbcbcbbccccf..cdbbbc
-        ........fcc131c1bbbcbcbcccccfcddbbc.
-        .........f111111bbbcbcbccccccbdbbf..
-        .........f1111111bbbbbccccccccbbcf..
-        ..........f111111bbbbcccccccffbccf..
-        ...........c1111cbbbcccccbdbc.fbbcf.
-        ............cc11cbbbfddddddc...fbbf.
-        ..............cffbdbbfdddcc.....fbbf
-        .................fbdbbfcc........fff
-        ..................fffff.............
-        `,
-    img`
-        ....................ccfff...........
-        ..........fffffffffcbbbbf...........
-        .........fbbbbbbbbbfffbf............
-        .........fbb111bffbbbbff............
-        .........fb11111ffbbbbbcff..........
-        .........f1cccc11bbcbcbcccf.........
-        ..........fc1c1c1bbbcbcbcccf...ccccc
-        ............c3331bbbcbcbccccfccddbbc
-        ...........c333c1bbbbbbbcccccbddbcc.
-        ...........c331c11bbbbbcccccccbbcc..
-        ..........cc13c111bbbbccccccffbccf..
-        ..........c111111cbbbcccccbbc.fccf..
-        ...........cc1111cbbbfdddddc..fbbcf.
-        .............cccffbdbbfdddc....fbbf.
-        ..................fbdbbfcc......fbbf
-        ...................fffff.........fff
-        `,
-    img`
-        ...........fffffff...ccfff..........
-        ..........fbbbbbbbffcbbbbf..........
-        ..........fbb111bbbbbffbf...........
-        ..........fb11111ffbbbbff...........
-        ..........f1cccc1ffbbbbbcff.........
-        ..........ffc1c1c1bbcbcbcccf........
-        ...........fcc3331bbbcbcbcccf..ccccc
-        ............c333c1bbbcbcbccccfcddbbc
-        ............c333c1bbbbbbbcccccddbcc.
-        ............c333c11bbbbbccccccbbcc..
-        ...........cc331c11bbbbccccccfbccf..
-        ...........cc13c11cbbbcccccbbcfccf..
-        ...........c111111cbbbfdddddc.fbbcf.
-        ............cc1111fbdbbfdddc...fbbf.
-        ..............cccfffbdbbfcc.....fbbf
-        ....................fffff........fff
-        `,
-    img`
-        ....................................
-        ....................................
-        ....................................
-        ...............ccffff...............
-        ..............cddbbbf...............
-        .......ffffffcddbbbf................
-        .....ffbbbbbbbbbbbbbcfff.......ccccc
-        ...ffbbbbbbbbcbcbbbbbcccff....cdbbbc
-        ..fbbbbbbbbbbcbbcbbbbcccccfffcddbbc.
-        .fbcbbbbbbbbbbcbcbbbbccccccccbdbbf..
-        .fbbbbbbbfffbbcbbbbbccccccccccbbcf..
-        .ffbb1111fffbbcbbbbcccccccbcffbccf..
-        ..ff111111111bbbbccccccbbbcc..fbbcf.
-        ....ccccccc111bdbbbfddbccc.....ffbbf
-        ........ccccccfbdbbbfcc..........fff
-        ...............ffffff...............
-        `
-    ]
-    sharkAttackImagesRight = []
-    for (let index = 0; index <= sharkImagesLeft.length - 1; index++) {
-        anImage = sharkImagesLeft[index].clone()
-        anImage.flipX()
-        sharkImagesRight[index] = anImage
-    }
-    for (let index = 0; index <= sharkAttackImagesLeft.length - 1; index++) {
-        anImage = sharkAttackImagesLeft[index].clone()
-        anImage.flipX()
-        sharkAttackImagesRight[index] = anImage
-    }
 }
 function setPlayerVariables () {
     swimmingSpeedX = 30
@@ -673,16 +738,22 @@ function setPlayerVariables () {
         ............33..................
         ................................
         `]
+    attackingImagesLeft = []
     for (let index = 0; index <= swimmingImagesRight.length - 1; index++) {
         anImage = swimmingImagesRight[index].clone()
         anImage.flipX()
         swimmingImagesLeft[index] = anImage
     }
+    for (let index = 0; index <= attackingImagesRight.length - 1; index++) {
+        anImage = attackingImagesRight[index].clone()
+        anImage.flipX()
+        attackingImagesLeft[index] = anImage
+    }
 }
-let facingRight = false
 let hunterDyingImage: Image = null
-let anImage: Image = null
-let sharkAttackImagesLeft: Image[] = []
+let sceneIncreaseSpeed = 0
+let attackingImagesLeft: Image[] = []
+let attackingImagesRight: Image[] = []
 let swimmingImagesLeft: Image[] = []
 let spawnTimeMax = 0
 let spawnTimeMin = 0
@@ -692,30 +763,39 @@ let coralImages: Image[] = []
 let aWave2: Sprite = null
 let waves: Sprite[] = []
 let waveImages: Image[] = []
-let sharkAttackImagesRight: Image[] = []
-let sharkImagesRight: Image[] = []
-let sharkSpeedXMax = 0
 let sharkSpeedXMin = 0
-let sharkImagesLeft: Image[] = []
 let aShark: Sprite = null
 let nextTimeToSpawnEnemies = 0
-let attackingImagesRight: Image[] = []
 let milliSecondsPer10Air = 0
 let lastTimeNotTakingAir = 0
 let takingAir = false
 let coralSpeed = 0
 let waveSpeed = 0
+let facingRight = false
+let sharkSpeedXMax = 0
+let aSharkAnimationSpeed = 0
+let aSharkSpeed = 0
 let attacking = false
 let yMin = 0
 let air: StatusBarSprite = null
 let swimmingSpeedY = 0
+let swimmingSpeedX = 0
 let swimmingImagesRight: Image[] = []
 let hunter: Sprite = null
-let swimmingSpeedX = 0
-let sceneIncreaseSpeed = 0
+let sharkAnimationSpeed = 0
+let sharkAttackMax = 0
+let sharkAttackMin = 0
+let sharkNextAttackTime = ""
+let sharkIsAttacking = ""
+let anImage: Image = null
+let sharkAttackImagesRight: Image[] = []
+let sharkAttackImagesLeft: Image[] = []
+let sharkImagesRight: Image[] = []
+let sharkImagesLeft: Image[] = []
 setGame()
 game.onUpdate(function () {
     adjustScene()
     checkBreathing()
     spawnEnemies()
+    sharksAttack()
 })
