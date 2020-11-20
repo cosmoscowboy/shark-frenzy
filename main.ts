@@ -536,8 +536,16 @@ function setScene () {
 }
 function sharksAttack () {
     for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (true) {
-        	
+        if (!(sprites.readDataBoolean(value, sharkIsAttacking)) && sprites.readDataNumber(value, sharkNextAttackTime) < game.runtime()) {
+            sprites.setDataBoolean(value, sharkIsAttacking, true)
+            timer.background(function () {
+                setSharkAnimation(value, true)
+                timer.after(getSharkAnimationSpeed(value) * (Math.min(sharkAttackImagesLeft.length, sharkAttackImagesRight.length) - 1), function () {
+                    sprites.setDataNumber(value, sharkNextAttackTime, game.runtime() + randint(sharkAttackMin, sharkAttackMax))
+                    sprites.setDataBoolean(value, sharkIsAttacking, false)
+                    setSharkAnimation(value, false)
+                })
+            })
         }
     }
 }
