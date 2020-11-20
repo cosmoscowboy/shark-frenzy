@@ -2,6 +2,11 @@ namespace SpriteKind {
     export const Wave = SpriteKind.create()
     export const Coral = SpriteKind.create()
 }
+function playMusic () {
+    timer.background(function () {
+        music.playMelody(music.convertRTTTLToMelody("LeisureSuit:d=16,o=6,b=56:f.5,f#.5,g.5,g#5,32a#5,f5,g#.5,a#.5,32f5,g#5,32a#5,g#5,8c#.,a#5,32c#,a5,a#.5,c#.,32a5,a#5,32c#,d#,8e,c#.,f.,f.,f.,f.,f,32e,d#,8d,a#.5,e,32f,e,32f,c#,d#.,c#"), 200)
+    })
+}
 function setSharkProperties () {
     sharkImagesLeft = [img`
         .............ccfff..............
@@ -276,6 +281,15 @@ function checkBreathing () {
         }
     }
     hunter.z = hunter.y
+}
+function checkHunterAttack () {
+    if (attacking) {
+        for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
+            if (hunter.overlapsWith(value)) {
+                value.destroy(effects.bubbles, 200)
+            }
+        }
+    }
 }
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     facingRight = true
@@ -613,7 +627,7 @@ function setPlayerVariables () {
     swimmingSpeedY = 20
     sceneIncreaseSpeed = 0
     lastTimeNotTakingAir = game.runtime()
-    milliSecondsPer10Air = 1500
+    milliSecondsPer10Air = 2500
     attacking = false
     hunterDyingImage = img`
         ................................
@@ -806,4 +820,5 @@ game.onUpdate(function () {
     checkBreathing()
     spawnEnemies()
     sharksAttack()
+    checkHunterAttack()
 })
