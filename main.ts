@@ -1,10 +1,11 @@
 namespace SpriteKind {
     export const Wave = SpriteKind.create()
     export const Coral = SpriteKind.create()
+    export const Knife = SpriteKind.create()
 }
 function playMusic () {
     timer.background(function () {
-        music.playMelody(music.convertRTTTLToMelody("LeisureSuit:d=16,o=6,b=56:f.5,f#.5,g.5,g#5,32a#5,f5,g#.5,a#.5,32f5,g#5,32a#5,g#5,8c#.,a#5,32c#,a5,a#.5,c#.,32a5,a#5,32c#,d#,8e,c#.,f.,f.,f.,f.,f,32e,d#,8d,a#.5,e,32f,e,32f,c#,d#.,c#"), 200)
+        music.playMelody(music.convertRTTTLToMelody("Indy:d=4,o=5,b=250:e,8p,8f,8g,8p,1c6,8p.,d,8p,8e,1f,p.,g,8p,8a,8b,8p,1f6,p,a,8p,8b,2c6,2d6,2e6,e,8p,8f,8g,8p,1c6,p,d6,8p,8e6,1f.6,g,8p,8g,e.6,8p,d6,8p,8g,e.6,8p,d6,8p,8g,f.6,8p,e6,8p,8d6,2c6"), 80)
     })
 }
 function setSharkProperties () {
@@ -225,6 +226,8 @@ function setPlayer () {
     air.attachToSprite(hunter, 5, 5)
     air.setFlag(SpriteFlag.Invisible, false)
     hunter.y = yMin
+    knife = sprites.create(kniveImagesRight[0], SpriteKind.Knife)
+    knife.setFlag(SpriteFlag.Invisible, true)
     setPlayerAnimations()
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -281,15 +284,6 @@ function checkBreathing () {
         }
     }
     hunter.z = hunter.y
-}
-function checkHunterAttack () {
-    if (attacking) {
-        for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-            if (hunter.overlapsWith(value)) {
-                value.destroy(effects.bubbles, 200)
-            }
-        }
-    }
 }
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     facingRight = true
@@ -585,32 +579,57 @@ function setPlayerAnimations () {
     character.rule(Predicate.MovingLeft)
     )
 }
+function setKnifePosition () {
+    knife.top = hunter.top + 1
+    if (facingRight) {
+        knife.left = hunter.right - knife.width
+    } else {
+        knife.right = hunter.left + knife.width
+    }
+}
 function hunterAttacks () {
     attacking = true
     character.setCharacterAnimationsEnabled(hunter, false)
+    knife.setFlag(SpriteFlag.Invisible, false)
     if (facingRight) {
         animation.runImageAnimation(
         hunter,
         attackingImagesRight,
-        200,
+        attackSpeed,
+        false
+        )
+        animation.runImageAnimation(
+        knife,
+        kniveImagesRight,
+        attackSpeed,
         false
         )
         timer.after(500, function () {
             attacking = false
             hunter.setImage(swimmingImagesRight[0])
             character.setCharacterAnimationsEnabled(hunter, true)
+            animation.stopAnimation(animation.AnimationTypes.All, knife)
+            knife.setFlag(SpriteFlag.Invisible, true)
         })
     } else {
         animation.runImageAnimation(
         hunter,
         attackingImagesLeft,
-        200,
+        attackSpeed,
+        false
+        )
+        animation.runImageAnimation(
+        knife,
+        knifeImagesLeft,
+        attackSpeed,
         false
         )
         timer.after(500, function () {
             attacking = false
             hunter.setImage(swimmingImagesLeft[0])
             character.setCharacterAnimationsEnabled(hunter, true)
+            animation.stopAnimation(animation.AnimationTypes.All, knife)
+            knife.setFlag(SpriteFlag.Invisible, true)
         })
     }
 }
@@ -629,6 +648,7 @@ function setPlayerVariables () {
     lastTimeNotTakingAir = game.runtime()
     milliSecondsPer10Air = 2500
     attacking = false
+    attackSpeed = 200
     hunterDyingImage = img`
         ................................
         ................................
@@ -711,12 +731,12 @@ function setPlayerVariables () {
     swimmingImagesLeft = []
     attackingImagesRight = [img`
         ................................
-        ......................133.......
-        .....................111333.4...
-        ....................11111334....
-        ..................551111564.1...
-        ..................51111511...1..
-        ..................55ee3e3.....1.
+        ......................1.........
+        .....................111........
+        ....................11111.......
+        ..................5511115.......
+        ..................51111511......
+        ..................55ee3e3.......
         .................55533333.......
         ................55553333........
         ...e.......555.5555533..........
@@ -739,12 +759,12 @@ function setPlayerVariables () {
         ......................1.........
         .....................111........
         ....................11111.......
-        ..................5511115333....
-        ..................511115113334..
-        ..................55ee3e3..34...
-        .................55533333..4.1..
-        ................55553333......1.
-        ...........5...5555533.........1
+        ..................5511115.......
+        ..................51111511......
+        ..................55ee3e3.......
+        .................55533333.......
+        ................55553333........
+        ...........5...5555533..........
         ............5545555553...33.....
         .eeeee...33355455555555...3.....
         ..eeee333334444455555553...3....
@@ -761,6 +781,28 @@ function setPlayerVariables () {
         ................................
         `]
     attackingImagesLeft = []
+    kniveImagesRight = [img`
+        3 3 . . . . . . . 
+        . 3 3 3 . 4 . . . 
+        . . 3 3 4 . . . . 
+        . . . 4 . 1 . . . 
+        . . 1 . . . 1 . . 
+        . . . . . . . 1 . 
+        . . . . . . . . . 
+        . . . . . . . . . 
+        . . . . . . . . . 
+        `, img`
+        . . . . . . . . . 
+        . . . . . . . . . 
+        . . . . . . . . . 
+        . . 3 3 3 . . . . 
+        . . . 3 3 3 4 . . 
+        . . . . 3 4 . . . 
+        . . . . 4 . 1 . . 
+        . . . . . . . 1 . 
+        . . . . . . . . 1 
+        `]
+    knifeImagesLeft = []
     for (let index = 0; index <= swimmingImagesRight.length - 1; index++) {
         anImage = swimmingImagesRight[index].clone()
         anImage.flipX()
@@ -771,10 +813,26 @@ function setPlayerVariables () {
         anImage.flipX()
         attackingImagesLeft[index] = anImage
     }
+    for (let index = 0; index <= kniveImagesRight.length - 1; index++) {
+        anImage = kniveImagesRight[index].clone()
+        anImage.flipX()
+        knifeImagesLeft[index] = anImage
+    }
+}
+function checkHunterAttacks () {
+    if (attacking) {
+        for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
+            if (knife.overlapsWith(value)) {
+                value.destroy(effects.bubbles, 200)
+            }
+        }
+    }
 }
 let hunterDyingImage: Image = null
 let sceneIncreaseSpeed = 0
+let knifeImagesLeft: Image[] = []
 let attackingImagesLeft: Image[] = []
+let attackSpeed = 0
 let attackingImagesRight: Image[] = []
 let swimmingImagesLeft: Image[] = []
 let spawnTimeMax = 0
@@ -798,6 +856,8 @@ let sharkSpeedXMax = 0
 let aSharkAnimationSpeed = 0
 let aSharkSpeed = 0
 let attacking = false
+let kniveImagesRight: Image[] = []
+let knife: Sprite = null
 let yMin = 0
 let air: StatusBarSprite = null
 let swimmingSpeedY = 0
@@ -820,5 +880,6 @@ game.onUpdate(function () {
     checkBreathing()
     spawnEnemies()
     sharksAttack()
-    checkHunterAttack()
+    checkHunterAttacks()
+    setKnifePosition()
 })
