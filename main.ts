@@ -3,6 +3,20 @@ namespace SpriteKind {
     export const Coral = SpriteKind.create()
     export const Knife = SpriteKind.create()
 }
+function sharkOverlapsPlayer (aShark: Sprite) {
+    if (sharkIsBitingGet(aShark)) {
+        // Check position of bite
+        if (aShark.vx < 0 && aShark.x - 3 > hunter.left) {
+            sharkBitPlayer(aShark)
+        } else if (aShark.vx > 0 && aShark.x + 3 < hunter.right) {
+            sharkBitPlayer(aShark)
+        } else {
+        	
+        }
+    } else {
+    	
+    }
+}
 function sharkIsAttackingSet (aShark: Sprite, value: boolean) {
     sprites.setDataBoolean(aShark, sharkIsAttacking, value)
 }
@@ -210,16 +224,11 @@ function setSharkProperties () {
     sharkAttackMax = 3000
     sharkAnimationSpeed = 200
 }
-function sharkBitesPlayer (aShark: Sprite) {
-    info.changeLifeBy(-1)
-}
-function adjustSceneSpriteSpeed (sceneSprite: Sprite, spriteSpeed: number) {
+function adjustSceneSpriteSpeed (sceneSprite: Sprite, sceneAdjustment: number) {
     if (hunter.vx == 0) {
         sceneSprite.vx = 0
-    } else if (hunter.vx > 0) {
-        sceneSprite.vx = 0 - spriteSpeed
     } else {
-        sceneSprite.vx = spriteSpeed
+        sceneSprite.vx = 0 - hunter.vx * sceneAdjustment
     }
 }
 function setPlayer () {
@@ -272,13 +281,13 @@ function adjustScene () {
         } else if (aWave.left > scene.screenWidth()) {
             aWave.right = 0
         }
-        adjustSceneSpriteSpeed(aWave, waveSpeed)
+        adjustSceneSpriteSpeed(aWave, waveSpeedAdjustment)
     }
     for (let aCoralReef of sprites.allOfKind(SpriteKind.Coral)) {
         if (aCoralReef.right < 0) {
             aCoralReef.left = scene.screenWidth()
         }
-        adjustSceneSpriteSpeed(aCoralReef, coralSpeed)
+        adjustSceneSpriteSpeed(aCoralReef, coralSpeedAdjustment)
     }
 }
 function checkBreathing () {
@@ -297,6 +306,12 @@ function checkBreathing () {
         }
     }
     hunter.z = hunter.y
+}
+function sharkBitPlayer (aShark: Sprite) {
+    hunter.say("ouch")
+    timer.after(500, function () {
+        hunter.say("")
+    })
 }
 function sharkIsBitingGet (aShark: Sprite) {
     return sprites.readDataBoolean(aShark, sharkIsBiting)
@@ -484,7 +499,7 @@ function setScene () {
         cccc887ccccccccc88ccccccc78ccccccc888888888cccccccccccc8888888ccccccc8888888cccccccccccc8888ccccccccc8cccccccccc888cccccccc888888ccccccccc8cccccccc888888ccccccc
         ccc88878ccccc88888cccccc7788ccccc8888888888ccccccccc8888888888cccccc88888888cccccccccccc88888ccccccccccccccccccc8888ccccccc8888888cccccccc8ccccccccc88888ccccccc
         `)
-    waveSpeed = 7.5
+    waveSpeedAdjustment = 0.8
     waveImages = [img`
         9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
         9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
@@ -515,7 +530,7 @@ function setScene () {
         waves.push(aWave2)
     }
     yMin = waves[0].bottom - 3
-    coralSpeed = 3
+    coralSpeedAdjustment = 0.4
     coralImages = [img`
         8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
         8888877788888888888888888888888888888888888888888888888888888888888888888888888878888888888888888888888888888888888888888888888888888888888888888888888888888888
@@ -675,8 +690,8 @@ function checkAttacks () {
         if (attacking && knife.overlapsWith(value)) {
             info.changeScoreBy(1)
             value.destroy(effects.bubbles, 200)
-        } else if (value.overlapsWith(hunter) && sharkIsBitingGet(value)) {
-            sharkBitesPlayer(value)
+        } else if (value.overlapsWith(hunter)) {
+            sharkOverlapsPlayer(value)
         }
     }
 }
@@ -886,8 +901,8 @@ let nextTimeToSpawnEnemies = 0
 let milliSecondsPer10Air = 0
 let lastTimeNotTakingAir = 0
 let takingAir = false
-let coralSpeed = 0
-let waveSpeed = 0
+let coralSpeedAdjustment = 0
+let waveSpeedAdjustment = 0
 let facingRight = false
 let sharkSpeedXMax = 0
 let aSharkAnimationSpeed = 0
@@ -900,7 +915,6 @@ let air: StatusBarSprite = null
 let swimmingSpeedY = 0
 let swimmingSpeedX = 0
 let swimmingImagesRight: Image[] = []
-let hunter: Sprite = null
 let sharkAnimationSpeed = 0
 let sharkAttackMax = 0
 let sharkAttackMin = 0
@@ -912,6 +926,7 @@ let sharkAttackImagesLeft: Image[] = []
 let sharkImagesRight: Image[] = []
 let sharkImagesLeft: Image[] = []
 let sharkIsAttacking = ""
+let hunter: Sprite = null
 setGame()
 game.onUpdate(function () {
     adjustScene()
