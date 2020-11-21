@@ -3,6 +3,9 @@ namespace SpriteKind {
     export const Coral = SpriteKind.create()
     export const Knife = SpriteKind.create()
 }
+function sharkIsAttackingSet (aShark: Sprite, value: boolean) {
+    sprites.setDataBoolean(aShark, sharkIsAttacking, value)
+}
 function playMusic () {
     timer.background(function () {
         music.playMelody(music.convertRTTTLToMelody("Indy:d=4,o=5,b=250:e,8p,8f,8g,8p,1c6,8p.,d,8p,8e,1f,p.,g,8p,8a,8b,8p,1f6,p,a,8p,8b,2c6,2d6,2e6,e,8p,8f,8g,8p,1c6,p,d6,8p,8e6,1f.6,g,8p,8g,e.6,8p,d6,8p,8g,e.6,8p,d6,8p,8g,f.6,8p,e6,8p,8d6,2c6"), 80)
@@ -201,10 +204,14 @@ function setSharkProperties () {
         sharkAttackImagesRight[index] = anImage
     }
     sharkIsAttacking = "dataSharkIsAttacking"
+    sharkIsBiting = "dataSharkIsBiting"
     sharkNextAttackTime = "dataSharkNextAttackTime"
     sharkAttackMin = 1000
     sharkAttackMax = 3000
     sharkAnimationSpeed = 200
+}
+function sharkBitesPlayer (aShark: Sprite) {
+    info.changeLifeBy(-1)
 }
 function adjustSceneSpriteSpeed (sceneSprite: Sprite, spriteSpeed: number) {
     if (hunter.vx == 0) {
@@ -230,6 +237,9 @@ function setPlayer () {
     knife.setFlag(SpriteFlag.Invisible, true)
     setPlayerAnimations()
 }
+function sharkIsBitingSet (aShark: Sprite, value: boolean) {
+    sprites.setDataBoolean(aShark, sharkIsBiting, value)
+}
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (!(attacking)) {
         hunterAttacks()
@@ -248,6 +258,9 @@ function getSharkAnimationSpeed (aShark: Sprite) {
         aSharkAnimationSpeed = sharkAnimationSpeed + sharkAnimationSpeed * (aSharkSpeed / sharkSpeedXMax)
     }
     return aSharkAnimationSpeed
+}
+function sharkNextAttackTimeSet (aShark: Sprite, time: number) {
+    sprites.setDataNumber(aShark, sharkNextAttackTime, time)
 }
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     facingRight = false
@@ -285,6 +298,9 @@ function checkBreathing () {
     }
     hunter.z = hunter.y
 }
+function sharkIsBitingGet (aShark: Sprite) {
+    return sprites.readDataBoolean(aShark, sharkIsBiting)
+}
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     facingRight = true
 })
@@ -295,8 +311,9 @@ function spawnEnemies () {
         aShark.top = randint(yMin, scene.screenHeight() - aShark.height)
         aShark.setFlag(SpriteFlag.AutoDestroy, true)
         aShark.z = aShark.y
-        sprites.setDataBoolean(aShark, sharkIsAttacking, false)
-        sprites.setDataNumber(aShark, sharkNextAttackTime, game.runtime() + randint(sharkAttackMin, sharkAttackMax))
+        sharkIsAttackingSet(aShark, false)
+        sharkIsBitingSet(aShark, false)
+        sharkNextAttackTimeSet(aShark, game.runtime() + randint(sharkAttackMin, sharkAttackMax))
         if (Math.percentChance(50)) {
             aShark.left = scene.screenWidth() - 5
             aShark.vx = 0 - randint(sharkSpeedXMin, sharkSpeedXMax)
@@ -309,6 +326,7 @@ function spawnEnemies () {
     }
 }
 function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
+    animation.stopAnimation(animation.AnimationTypes.All, aShark)
     if (aShark.vx < 0) {
         if (isAttacking) {
             animation.runImageAnimation(
@@ -544,14 +562,22 @@ function setScene () {
 }
 function sharksAttack () {
     for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (!(sprites.readDataBoolean(value, sharkIsAttacking)) && sprites.readDataNumber(value, sharkNextAttackTime) < game.runtime()) {
-            sprites.setDataBoolean(value, sharkIsAttacking, true)
+        if (!(sharkIsAttackingGet(value)) && sharkNextAttackTimeGet(value) < game.runtime()) {
             timer.background(function () {
+                sharkIsAttackingSet(value, true)
                 setSharkAnimation(value, true)
-                timer.after(getSharkAnimationSpeed(value) * (Math.min(sharkAttackImagesLeft.length, sharkAttackImagesRight.length) - 1), function () {
-                    sprites.setDataNumber(value, sharkNextAttackTime, game.runtime() + randint(sharkAttackMin, sharkAttackMax))
-                    sprites.setDataBoolean(value, sharkIsAttacking, false)
-                    setSharkAnimation(value, false)
+                timer.background(function () {
+                    timer.after(getSharkAnimationSpeed(value) * (Math.min(sharkAttackImagesLeft.length, sharkAttackImagesRight.length) / 2), function () {
+                        sharkIsBitingSet(value, true)
+                    })
+                })
+                timer.background(function () {
+                    timer.after(getSharkAnimationSpeed(value) * Math.min(sharkAttackImagesLeft.length, sharkAttackImagesRight.length), function () {
+                        sharkNextAttackTimeSet(value, game.runtime() + randint(sharkAttackMin, sharkAttackMax))
+                        sharkIsAttackingSet(value, false)
+                        sharkIsBitingSet(value, false)
+                        setSharkAnimation(value, false)
+                    })
                 })
             })
         }
@@ -641,9 +667,25 @@ function setGame () {
     setPlayer()
     setEnemies()
 }
+function sharkIsAttackingGet (aShark: Sprite) {
+    return sprites.readDataBoolean(aShark, sharkIsAttacking)
+}
+function checkAttacks () {
+    for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
+        if (attacking && knife.overlapsWith(value)) {
+            info.changeScoreBy(1)
+            value.destroy(effects.bubbles, 200)
+        } else if (value.overlapsWith(hunter) && sharkIsBitingGet(value)) {
+            sharkBitesPlayer(value)
+        }
+    }
+}
 function setPlayerVariables () {
     swimmingSpeedX = 30
     swimmingSpeedY = 20
+    maxLives = 5
+    info.setLife(maxLives)
+    info.setScore(0)
     sceneIncreaseSpeed = 0
     lastTimeNotTakingAir = game.runtime()
     milliSecondsPer10Air = 2500
@@ -819,17 +861,12 @@ function setPlayerVariables () {
         knifeImagesLeft[index] = anImage
     }
 }
-function checkHunterAttacks () {
-    if (attacking) {
-        for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-            if (knife.overlapsWith(value)) {
-                value.destroy(effects.bubbles, 200)
-            }
-        }
-    }
+function sharkNextAttackTimeGet (aShark: Sprite) {
+    return sprites.readDataNumber(aShark, sharkNextAttackTime)
 }
 let hunterDyingImage: Image = null
 let sceneIncreaseSpeed = 0
+let maxLives = 0
 let knifeImagesLeft: Image[] = []
 let attackingImagesLeft: Image[] = []
 let attackSpeed = 0
@@ -868,18 +905,19 @@ let sharkAnimationSpeed = 0
 let sharkAttackMax = 0
 let sharkAttackMin = 0
 let sharkNextAttackTime = ""
-let sharkIsAttacking = ""
+let sharkIsBiting = ""
 let anImage: Image = null
 let sharkAttackImagesRight: Image[] = []
 let sharkAttackImagesLeft: Image[] = []
 let sharkImagesRight: Image[] = []
 let sharkImagesLeft: Image[] = []
+let sharkIsAttacking = ""
 setGame()
 game.onUpdate(function () {
     adjustScene()
     checkBreathing()
     spawnEnemies()
     sharksAttack()
-    checkHunterAttacks()
+    checkAttacks()
     setKnifePosition()
 })
