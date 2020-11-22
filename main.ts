@@ -3,6 +3,13 @@ namespace SpriteKind {
     export const Coral = SpriteKind.create()
     export const Knife = SpriteKind.create()
 }
+function sharkDies (aShark: Sprite) {
+    info.changeScoreBy(1)
+    aShark.destroy(effects.bubbles, 200)
+    timer.background(function () {
+        music.jumpUp.play()
+    })
+}
 function sharkOverlapsPlayer (aShark: Sprite) {
     if (!(dying)) {
         if (sharkIsBitingGet(aShark)) {
@@ -274,9 +281,11 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 10, function (status) {
     scene.cameraShake(4, 500)
+    music.jumpDown.play()
 })
 statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 30, function (status) {
     scene.cameraShake(4, 500)
+    music.jumpDown.play()
 })
 function getSharkAnimationSpeed (aShark: Sprite) {
     aSharkSpeed = Math.abs(aShark.vx)
@@ -759,8 +768,7 @@ function sharkIsAttackingGet (aShark: Sprite) {
 function checkAttacks () {
     for (let value2 of sprites.allOfKind(SpriteKind.Enemy)) {
         if (attacking && knife.overlapsWith(value2)) {
-            info.changeScoreBy(1)
-            value2.destroy(effects.bubbles, 200)
+            sharkDies(value2)
         } else if (value2.overlapsWith(hunter)) {
             sharkOverlapsPlayer(value2)
         }
