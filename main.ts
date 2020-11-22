@@ -272,7 +272,9 @@ function sharkNextAttackTimeSet (aShark: Sprite, time: number) {
     sprites.setDataNumber(aShark, sharkNextAttackTime, time)
 }
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    facingRight = false
+    if (!(attacking)) {
+        facingRight = false
+    }
 })
 function adjustScene () {
     for (let aWave of sprites.allOfKind(SpriteKind.Wave)) {
@@ -286,6 +288,8 @@ function adjustScene () {
     for (let aCoralReef of sprites.allOfKind(SpriteKind.Coral)) {
         if (aCoralReef.right < 0) {
             aCoralReef.left = scene.screenWidth()
+        } else if (aCoralReef.left > scene.screenWidth()) {
+            aCoralReef.right = 0
         }
         adjustSceneSpriteSpeed(aCoralReef, coralSpeedAdjustment)
     }
@@ -300,8 +304,8 @@ function checkBreathing () {
         takingAir = false
     }
     if (!(takingAir)) {
-        if (lastTimeNotTakingAir + milliSecondsPer10Air < game.runtime()) {
-            air.value += -10
+        if (lastTimeNotTakingAir + milliSecondsPer1Air < game.runtime()) {
+            air.value += -1
             lastTimeNotTakingAir = game.runtime()
         }
     }
@@ -317,7 +321,9 @@ function sharkIsBitingGet (aShark: Sprite) {
     return sprites.readDataBoolean(aShark, sharkIsBiting)
 }
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    facingRight = true
+    if (!(attacking)) {
+        facingRight = true
+    }
 })
 function spawnEnemies () {
     if (nextTimeToSpawnEnemies < game.runtime()) {
@@ -328,7 +334,7 @@ function spawnEnemies () {
         aShark.z = aShark.y
         sharkIsAttackingSet(aShark, false)
         sharkIsBitingSet(aShark, false)
-        sharkNextAttackTimeSet(aShark, game.runtime() + randint(sharkAttackMin, sharkAttackMax))
+        sharkNextAttackTimeSet(aShark, game.runtime() + randint(sharkAttackMin, sharkAttackMax) + randint(0, sharkAttackMin) / 2)
         if (Math.percentChance(50)) {
             aShark.left = scene.screenWidth() - 5
             aShark.vx = 0 - randint(sharkSpeedXMin, sharkSpeedXMax)
@@ -696,14 +702,14 @@ function checkAttacks () {
     }
 }
 function setPlayerVariables () {
-    swimmingSpeedX = 30
-    swimmingSpeedY = 20
+    swimmingSpeedX = 25
+    swimmingSpeedY = 15
     maxLives = 5
     info.setLife(maxLives)
     info.setScore(0)
     sceneIncreaseSpeed = 0
     lastTimeNotTakingAir = game.runtime()
-    milliSecondsPer10Air = 2500
+    milliSecondsPer1Air = 250
     attacking = false
     attackSpeed = 200
     hunterDyingImage = img`
@@ -898,7 +904,7 @@ let waveImages: Image[] = []
 let sharkSpeedXMin = 0
 let aShark: Sprite = null
 let nextTimeToSpawnEnemies = 0
-let milliSecondsPer10Air = 0
+let milliSecondsPer1Air = 0
 let lastTimeNotTakingAir = 0
 let takingAir = false
 let coralSpeedAdjustment = 0
