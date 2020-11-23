@@ -35,12 +35,12 @@ function sharksFrenzy () {
             value.vx = 0 - value.vx
             setSharkAnimation(value, true)
         }
-        value.follow(hunter, Math.abs(value.vx * 1.1))
+        value.follow(hunter, Math.abs(value.vx * 1.2))
     }
 }
 function playMusic () {
     timer.background(function () {
-        music.playMelody(music.convertRTTTLToMelody("Indy:d=4,o=5,b=250:e,8p,8f,8g,8p,1c6,8p.,d,8p,8e,1f,p.,g,8p,8a,8b,8p,1f6,p,a,8p,8b,2c6,2d6,2e6,e,8p,8f,8g,8p,1c6,p,d6,8p,8e6,1f.6,g,8p,8g,e.6,8p,d6,8p,8g,e.6,8p,d6,8p,8g,f.6,8p,e6,8p,8d6,2c6"), 80)
+        music.playMelody(music.convertRTTTLToMelody("Jaws:d=4,o=5,b=112:e,8f,2p,e,8f,2p,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8p,16p,16d#,16g,2c#6,2p,16d#,16g,16c#6,16d#6,16a#,16d#,2c#"), 64)
     })
 }
 function setSharkProperties () {
@@ -388,7 +388,7 @@ function playerDies (byShark: boolean) {
     sharksFrenzy()
     playerHealth.value = 0
     timer.background(function () {
-        music.wawawawaa.play()
+        music.powerDown.play()
     })
     timer.after(3000, function () {
         restartAfterDying()
@@ -761,6 +761,7 @@ function setGame () {
     setScene()
     setPlayer()
     setEnemies()
+    playMusic()
 }
 function sharkIsAttackingGet (aShark: Sprite) {
     return sprites.readDataBoolean(aShark, sharkIsAttacking)
