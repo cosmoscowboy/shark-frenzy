@@ -240,7 +240,7 @@ function setSharkProperties () {
     sharkIsAttacking = "dataSharkIsAttacking"
     sharkIsBiting = "dataSharkIsBiting"
     sharkNextAttackTime = "dataSharkNextAttackTime"
-    sharkAttackMin = 1000
+    sharkAttackMin = 500
     sharkAttackMax = 3000
     sharkAnimationSpeed = 200
 }
@@ -559,14 +559,14 @@ function showTitleScreen () {
     title2.left = scene.screenWidth()
     title2.y = title2Position.y
     title1.follow(title1Position, 175)
-    timer.after(1000, function () {
+    timer.after(500, function () {
         sceneSprite = title2
         title2.follow(title2Position, 175)
     })
     timer.after(3000, function () {
         sceneSprite = title1
         title1Position.x = 0 - title1Position.width * 2
-        timer.after(1000, function () {
+        timer.after(500, function () {
             sceneSprite = title2
             title2Position.x = 0 - title2Position.width * 2
             timer.after(1500, function () {
@@ -864,8 +864,8 @@ function setEnemies () {
     spawnTimeMin = 1500
     spawnTimeMax = 5000
     nextTimeToSpawnEnemies = getNextSpawnTime()
-    sharkSpeedXMin = 12
-    sharkSpeedXMax = 22
+    sharkSpeedXMin = 17
+    sharkSpeedXMax = 27
     setSharkProperties()
 }
 function setPlayerAnimations () {
@@ -963,8 +963,8 @@ function checkAttacks () {
     }
 }
 function setPlayerVariables () {
-    swimmingSpeedX = 25
-    swimmingSpeedY = 15
+    swimmingSpeedX = 30
+    swimmingSpeedY = 25
     hunterAnimationSpeed = 200
     maxLives = 5
     info.setLife(maxLives)
@@ -1231,4 +1231,3 @@ game.onUpdate(function () {
         setKnifePosition()
     }
 })
-
