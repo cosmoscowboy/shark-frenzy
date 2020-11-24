@@ -569,11 +569,10 @@ function showTitleScreen () {
         timer.after(500, function () {
             sceneSprite = title2
             title2Position.x = 0 - title2Position.width * 2
-            timer.after(1500, function () {
+            timer.after(1000, function () {
                 clearTitleScreen()
                 fadeOut()
-                fadeIn()
-                setGame()
+                showInstructions()
                 showingIntroduction = false
             })
         })
@@ -945,8 +944,14 @@ function clearTitleScreen () {
 function getNextSpawnTime () {
     return game.runtime() + randint(spawnTimeMin, spawnTimeMin)
 }
-function setGame () {
+function showInstructions () {
+    fadeIn()
     setPlayer()
+    game.showLongText("The ocean is rampant with killer sharks.", DialogLayout.Bottom)
+    game.showLongText("Use your knife to thwart those pesky carnivores.", DialogLayout.Bottom)
+    setGame()
+}
+function setGame () {
     setEnemies()
     playMusic()
 }
@@ -1165,6 +1170,8 @@ function sharkNextAttackTimeGet (aShark: Sprite) {
 let dyingImagesLeft: Image[] = []
 let sceneIncreaseSpeed = 0
 let maxLives = 0
+let showInstructionsAnswer = false
+let settingInstructionsSeen = ""
 let knifeImagesLeft: Image[] = []
 let attackingImagesLeft: Image[] = []
 let attackingImagesRight: Image[] = []
