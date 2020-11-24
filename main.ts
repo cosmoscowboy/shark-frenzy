@@ -277,7 +277,7 @@ function sharkIsBitingSet (aShark: Sprite, value: boolean) {
     sprites.setDataBoolean(aShark, sharkIsBiting, value)
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (!(attacking) && !(dying)) {
+    if (!(attacking) && !(dying) && !(showingIntroduction)) {
         hunterAttacks()
     }
 })
@@ -1170,8 +1170,6 @@ function sharkNextAttackTimeGet (aShark: Sprite) {
 let dyingImagesLeft: Image[] = []
 let sceneIncreaseSpeed = 0
 let maxLives = 0
-let showInstructionsAnswer = false
-let settingInstructionsSeen = ""
 let knifeImagesLeft: Image[] = []
 let attackingImagesLeft: Image[] = []
 let attackingImagesRight: Image[] = []
@@ -1202,8 +1200,8 @@ let title2: Sprite = null
 let title1: Sprite = null
 let title2Position: Sprite = null
 let title1Position: Sprite = null
-let showingIntroduction = false
 let sceneSprite: Sprite = null
+let showingIntroduction = false
 let attacking = false
 let kniveImagesRight: Image[] = []
 let knife: Sprite = null
@@ -1225,6 +1223,8 @@ let sharkImagesLeft: Image[] = []
 let sharkIsAttacking = ""
 let hunter: Sprite = null
 let dying = false
+let settingInstructionsSeen = ""
+let showInstructionsAnswer = false
 showTitleScreen()
 game.onUpdate(function () {
     if (showingIntroduction) {
