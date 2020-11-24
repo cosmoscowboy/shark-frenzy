@@ -2,6 +2,8 @@ namespace SpriteKind {
     export const Wave = SpriteKind.create()
     export const Coral = SpriteKind.create()
     export const Knife = SpriteKind.create()
+    export const Title = SpriteKind.create()
+    export const Scene = SpriteKind.create()
 }
 function sharkDies (aShark: Sprite) {
     info.changeScoreBy(1)
@@ -40,7 +42,7 @@ function sharksFrenzy () {
 }
 function playMusic () {
     timer.background(function () {
-        music.playMelody(music.convertRTTTLToMelody("Jaws:d=4,o=5,b=112:e,8f,2p,e,8f,2p,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8p,16p,16d#,16g,2c#6,2p,16d#,16g,16c#6,16d#6,16a#,16d#,2c#"), 64)
+        music.playMelody(music.convertRTTTLToMelody("Jaws:d=4,o=5,b=112:e,8f,2p,e,8f,2p,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8p,16p,16d#,16g,2c#6,2p,16d#,16g,16c#6,16d#6,16a#,16d#,2c#"), 224)
     })
 }
 function setSharkProperties () {
@@ -251,11 +253,11 @@ function setPlayerPosition () {
     character.setCharacterAnimationsEnabled(hunter, true)
     dying = false
 }
-function adjustSceneSpriteSpeed (sceneSprite: Sprite, sceneAdjustment: number) {
-    if (hunter.vx == 0) {
+function adjustSceneSpriteSpeed (sceneSprite: Sprite, sceneAdjustment: number, movingSprite: Sprite) {
+    if (movingSprite.vx == 0) {
         sceneSprite.vx = 0
     } else {
-        sceneSprite.vx = 0 - hunter.vx * sceneAdjustment
+        sceneSprite.vx = 0 - movingSprite.vx * sceneAdjustment
     }
 }
 function setPlayer () {
@@ -283,180 +285,26 @@ statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ,
     scene.cameraShake(4, 500)
     music.jumpDown.play()
 })
-statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 30, function (status) {
-    scene.cameraShake(4, 500)
-    music.jumpDown.play()
-})
-function getSharkAnimationSpeed (aShark: Sprite) {
-    aSharkSpeed = Math.abs(aShark.vx)
-    aSharkAnimationSpeed = sharkAnimationSpeed
-    if (aSharkSpeed < sharkSpeedXMax) {
-        aSharkAnimationSpeed = sharkAnimationSpeed + sharkAnimationSpeed * (aSharkSpeed / sharkSpeedXMax)
-    }
-    return aSharkAnimationSpeed
-}
-function sharkNextAttackTimeSet (aShark: Sprite, time: number) {
-    sprites.setDataNumber(aShark, sharkNextAttackTime, time)
-}
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (!(attacking)) {
-        facingRight = false
-    }
-})
-function adjustScene () {
-    for (let aWave of sprites.allOfKind(SpriteKind.Wave)) {
-        if (aWave.right < 0) {
-            aWave.left = scene.screenWidth()
-        } else if (aWave.left > scene.screenWidth()) {
-            aWave.right = 0
-        }
-        adjustSceneSpriteSpeed(aWave, waveSpeedAdjustment)
-    }
-    for (let aCoralReef of sprites.allOfKind(SpriteKind.Coral)) {
-        if (aCoralReef.right < 0) {
-            aCoralReef.left = scene.screenWidth()
-        } else if (aCoralReef.left > scene.screenWidth()) {
-            aCoralReef.right = 0
-        }
-        adjustSceneSpriteSpeed(aCoralReef, coralSpeedAdjustment)
-    }
-}
-function checkBreathing () {
-    if (hunter.y < yMin) {
-        hunter.y = yMin
-        if (!(dying)) {
-            takingAir = true
-            lastTimeNotTakingAir = game.runtime()
-            playerHealth.value = 100
-        }
-    } else if (hunter.y > yMin + 2) {
-        takingAir = false
-    }
-    if (!(takingAir) && !(dying)) {
-        if (lastTimeNotTakingAir + loseHealthPerMilliseconds < game.runtime()) {
-            playerHealth.value += -1
-            lastTimeNotTakingAir = game.runtime()
-        }
-    }
-    hunter.z = hunter.y
-}
-statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 0, function (status) {
-    scene.cameraShake(4, 500)
-    if (!(dying)) {
-        playerDies(false)
-    }
-})
-function sharkIsBitingGet (aShark: Sprite) {
-    return sprites.readDataBoolean(aShark, sharkIsBiting)
-}
-function restartAfterDying () {
-    info.changeLifeBy(-1)
-    for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-        value.destroy(effects.bubbles, 500)
-    }
-    timer.after(1500, function () {
-        setPlayerPosition()
-        playerHealth.value = 100
-    })
-}
-function playerDies (byShark: boolean) {
-    if (byShark) {
-    	
-    } else {
-    	
-    }
-    animation.stopAnimation(animation.AnimationTypes.All, hunter)
-    character.setCharacterAnimationsEnabled(hunter, false)
-    dying = true
-    controller.moveSprite(hunter, 0, 0)
-    hunter.vy = 0 - swimmingSpeedY / 2
-    if (facingRight) {
-        animation.runImageAnimation(
-        hunter,
-        dyingImagesRight,
-        hunterAnimationSpeed,
-        true
-        )
-    } else {
-        animation.runImageAnimation(
-        hunter,
-        dyingImagesRight,
-        hunterAnimationSpeed,
-        true
-        )
-    }
-    sharksFrenzy()
-    playerHealth.value = 0
-    timer.background(function () {
-        music.powerDown.play()
-    })
-    timer.after(3000, function () {
-        restartAfterDying()
-    })
-}
-controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (!(attacking)) {
-        facingRight = true
-    }
-})
-function spawnEnemies () {
-    if (nextTimeToSpawnEnemies < game.runtime() && !(dying)) {
-        nextTimeToSpawnEnemies = getNextSpawnTime()
-        aShark = sprites.create(sharkImagesLeft[0], SpriteKind.Enemy)
-        aShark.top = randint(yMin, scene.screenHeight() - aShark.height)
-        aShark.setFlag(SpriteFlag.AutoDestroy, true)
-        aShark.z = aShark.y
-        sharkIsAttackingSet(aShark, false)
-        sharkIsBitingSet(aShark, false)
-        sharkNextAttackTimeSet(aShark, game.runtime() + randint(sharkAttackMin, sharkAttackMax) + randint(0, sharkAttackMin) / 2)
-        if (Math.percentChance(50)) {
-            aShark.left = scene.screenWidth() - 5
-            aShark.vx = 0 - randint(sharkSpeedXMin, sharkSpeedXMax)
-        } else {
-            aShark.right = 5
-            aShark.vx = randint(sharkSpeedXMin, sharkSpeedXMax)
-            aShark.setImage(sharkImagesRight[0])
-        }
-        setSharkAnimation(aShark, false)
-    }
-}
-function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
-    animation.stopAnimation(animation.AnimationTypes.All, aShark)
-    if (aShark.vx < 0) {
-        if (isAttacking) {
-            animation.runImageAnimation(
-            aShark,
-            sharkAttackImagesLeft,
-            getSharkAnimationSpeed(aShark),
-            true
-            )
-        } else {
-            animation.runImageAnimation(
-            aShark,
-            sharkImagesLeft,
-            getSharkAnimationSpeed(aShark),
-            true
-            )
-        }
-    } else {
-        if (isAttacking) {
-            animation.runImageAnimation(
-            aShark,
-            sharkAttackImagesRight,
-            getSharkAnimationSpeed(aShark),
-            true
-            )
-        } else {
-            animation.runImageAnimation(
-            aShark,
-            sharkImagesRight,
-            getSharkAnimationSpeed(aShark),
-            true
-            )
-        }
-    }
-}
-function setScene () {
+function showTitleScreen () {
+    sceneSprite = sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.Scene)
+    showingIntroduction = true
     scene.setBackgroundImage(img`
         9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
         9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
@@ -579,6 +427,340 @@ function setScene () {
         cccc887ccccccccc88ccccccc78ccccccc888888888cccccccccccc8888888ccccccc8888888cccccccccccc8888ccccccccc8cccccccccc888cccccccc888888ccccccccc8cccccccc888888ccccccc
         ccc88878ccccc88888cccccc7788ccccc8888888888ccccccccc8888888888cccccc88888888cccccccccccc88888ccccccccccccccccccc8888ccccccc8888888cccccccc8ccccccccc88888ccccccc
         `)
+    setScene()
+    fadeIn()
+    title1Position = sprites.create(img`
+        6 . . . . . . . . . . . . . . 6 
+        . 6 . . . . . . . . . . . . 6 . 
+        . . 6 . . . . . . . . . . 6 . . 
+        . . . 6 . . . . . . . . 6 . . . 
+        . . . . 6 . . . . . . 6 . . . . 
+        . . . . . 6 . . . . 6 . . . . . 
+        . . . . . . 6 . . 6 . . . . . . 
+        . . . . . . . 6 6 . . . . . . . 
+        . . . . . . . 6 6 . . . . . . . 
+        . . . . . . 6 . . 6 . . . . . . 
+        . . . . . 6 . . . . 6 . . . . . 
+        . . . . 6 . . . . . . 6 . . . . 
+        . . . 6 . . . . . . . . 6 . . . 
+        . . 6 . . . . . . . . . . 6 . . 
+        . 6 . . . . . . . . . . . . 6 . 
+        6 . . . . . . . . . . . . . . 6 
+        `, SpriteKind.Title)
+    title1Position.setFlag(SpriteFlag.Invisible, true)
+    title1Position.setPosition(scene.screenWidth() / 3, scene.screenHeight() / 3)
+    title2Position = sprites.create(img`
+        4 . . . . . . . . . . . . . . 4 
+        . 4 . . . . . . . . . . . . 4 . 
+        . . 4 . . . . . . . . . . 4 . . 
+        . . . 4 . . . . . . . . 4 . . . 
+        . . . . 4 . . . . . . 4 . . . . 
+        . . . . . 4 . . . . 4 . . . . . 
+        . . . . . . 4 . . 4 . . . . . . 
+        . . . . . . . 4 4 . . . . . . . 
+        . . . . . . . 4 4 . . . . . . . 
+        . . . . . . 4 . . 4 . . . . . . 
+        . . . . . 4 . . . . 4 . . . . . 
+        . . . . 4 . . . . . . 4 . . . . 
+        . . . 4 . . . . . . . . 4 . . . 
+        . . 4 . . . . . . . . . . 4 . . 
+        . 4 . . . . . . . . . . . . 4 . 
+        4 . . . . . . . . . . . . . . 4 
+        `, SpriteKind.Title)
+    title2Position.setFlag(SpriteFlag.Invisible, true)
+    title2Position.setPosition(scene.screenWidth() / 3 + title2Position.width * 2, scene.screenHeight() - scene.screenHeight() / 2)
+    title1 = sprites.create(img`
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ......................66666.....66...........................66.................
+        ...................6666....6....66...........................66.................
+        .................66.............66...........................6..................
+        ................6................6...........................66.................
+        ...............6................66...........................66.................
+        ..............66.................6...........................66.................
+        ..............666................6...........................66.................
+        ...............6666666...........6...........................66.................
+        ................666.666666666....6............................6.................
+        ..........................6666...6.66666.....66666.....6.6666.6....6............
+        ............................666..66....66...6....66...666.....6...6.............
+        ............................666..6.....66.........6...66......6..6..............
+        .............................66..6.....66.....66666...66......6.6...............
+        ............................666..6.....66...66....6....6......666...............
+        ............................66...6.....66..66.....6...66......6.66..............
+        ............6...............66...6.....66..66....66...66......6..666............
+        ...........66..............66...66.....66..66666666...66.....66....666..........
+        ............66.............6....................................................
+        .............66...........6.....................................................
+        ..............666......666......................................................
+        .................6666666........................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        `, SpriteKind.Title)
+    sceneSprite = title1
+    title1.left = scene.screenWidth()
+    title1.y = title1Position.y
+    title2 = sprites.create(img`
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        .........444444444444444........................................................
+        ..........44....................................................................
+        ..........44....................................................................
+        ..........44....................................................................
+        ...........44444444444..........................................................
+        ...........44...................................................................
+        ...........44...................................................................
+        ...........4....................................................................
+        ...........4..............4.4444...4444....4.44444...444444....4....4...........
+        ...........44............444......44..44..444....4.......44...44...44...........
+        ...........4.............44......44444444..4.....4......44....44....4...........
+        ...........44............44.....44.........4.....4.....44.....4.....4...........
+        ...........44.............4.....44.........4.....4.....4......4....44...........
+        ...........44............44.....44.........4.....44...4......44....44...........
+        ...........44............44......4......4..4.....44..44......44...4.4...........
+        ...........44............44.......444444...4.....4..44444444..4444..4...........
+        ...........44.......................................................4...........
+        ...........44.......................................................4...........
+        ..........444......................................................44...........
+        ...................................................................44...........
+        ...................................................................4............
+        ............................................................4.....4.............
+        ............................................................444444..............
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        ................................................................................
+        `, SpriteKind.Title)
+    title2.left = scene.screenWidth()
+    title2.y = title2Position.y
+    title1.follow(title1Position, 175)
+    timer.after(1000, function () {
+        sceneSprite = title2
+        title2.follow(title2Position, 175)
+    })
+    timer.after(3000, function () {
+        sceneSprite = title1
+        title1Position.x = 0 - title1Position.width * 2
+        timer.after(1000, function () {
+            sceneSprite = title2
+            title2Position.x = 0 - title2Position.width * 2
+            timer.after(1500, function () {
+                clearTitleScreen()
+                fadeOut()
+                fadeIn()
+                setGame()
+                showingIntroduction = false
+            })
+        })
+    })
+}
+statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 30, function (status) {
+    scene.cameraShake(4, 500)
+    music.jumpDown.play()
+})
+function getSharkAnimationSpeed (aShark: Sprite) {
+    aSharkSpeed = Math.abs(aShark.vx)
+    aSharkAnimationSpeed = sharkAnimationSpeed
+    if (aSharkSpeed < sharkSpeedXMax) {
+        aSharkAnimationSpeed = sharkAnimationSpeed + sharkAnimationSpeed * (aSharkSpeed / sharkSpeedXMax)
+    }
+    return aSharkAnimationSpeed
+}
+function sharkNextAttackTimeSet (aShark: Sprite, time: number) {
+    sprites.setDataNumber(aShark, sharkNextAttackTime, time)
+}
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (!(attacking)) {
+        facingRight = false
+    }
+})
+function adjustScene (basedOnSprite: Sprite) {
+    for (let aWave of sprites.allOfKind(SpriteKind.Wave)) {
+        if (aWave.right < 0) {
+            aWave.left = scene.screenWidth()
+        } else if (aWave.left > scene.screenWidth()) {
+            aWave.right = 0
+        }
+        adjustSceneSpriteSpeed(aWave, waveSpeedAdjustment, basedOnSprite)
+    }
+    for (let aCoralReef of sprites.allOfKind(SpriteKind.Coral)) {
+        if (aCoralReef.right < 0) {
+            aCoralReef.left = scene.screenWidth()
+        } else if (aCoralReef.left > scene.screenWidth()) {
+            aCoralReef.right = 0
+        }
+        adjustSceneSpriteSpeed(aCoralReef, coralSpeedAdjustment, basedOnSprite)
+    }
+}
+function checkBreathing () {
+    if (hunter.y < yMin) {
+        hunter.y = yMin
+        if (!(dying)) {
+            takingAir = true
+            lastTimeNotTakingAir = game.runtime()
+            playerHealth.value = 100
+        }
+    } else if (hunter.y > yMin + 2) {
+        takingAir = false
+    }
+    if (!(takingAir) && !(dying)) {
+        if (lastTimeNotTakingAir + loseHealthPerMilliseconds < game.runtime()) {
+            playerHealth.value += -1
+            lastTimeNotTakingAir = game.runtime()
+        }
+    }
+    hunter.z = hunter.y
+}
+statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 0, function (status) {
+    scene.cameraShake(4, 500)
+    if (!(dying)) {
+        playerDies(false)
+    }
+})
+function sharkIsBitingGet (aShark: Sprite) {
+    return sprites.readDataBoolean(aShark, sharkIsBiting)
+}
+function restartAfterDying () {
+    info.changeLifeBy(-1)
+    for (let value2 of sprites.allOfKind(SpriteKind.Enemy)) {
+        value2.destroy(effects.bubbles, 500)
+    }
+    timer.after(1500, function () {
+        setPlayerPosition()
+        playerHealth.value = 100
+    })
+}
+function playerDies (byShark: boolean) {
+    if (byShark) {
+    	
+    } else {
+    	
+    }
+    animation.stopAnimation(animation.AnimationTypes.All, hunter)
+    character.setCharacterAnimationsEnabled(hunter, false)
+    dying = true
+    controller.moveSprite(hunter, 0, 0)
+    hunter.vy = 0 - swimmingSpeedY / 2
+    if (facingRight) {
+        animation.runImageAnimation(
+        hunter,
+        dyingImagesRight,
+        hunterAnimationSpeed,
+        true
+        )
+    } else {
+        animation.runImageAnimation(
+        hunter,
+        dyingImagesRight,
+        hunterAnimationSpeed,
+        true
+        )
+    }
+    sharksFrenzy()
+    playerHealth.value = 0
+    timer.background(function () {
+        music.powerDown.play()
+    })
+    timer.after(3000, function () {
+        restartAfterDying()
+    })
+}
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (!(attacking)) {
+        facingRight = true
+    }
+})
+function spawnEnemies () {
+    if (nextTimeToSpawnEnemies < game.runtime() && !(dying)) {
+        nextTimeToSpawnEnemies = getNextSpawnTime()
+        aShark = sprites.create(sharkImagesLeft[0], SpriteKind.Enemy)
+        aShark.top = randint(yMin, scene.screenHeight() - aShark.height)
+        aShark.setFlag(SpriteFlag.AutoDestroy, true)
+        aShark.z = aShark.y
+        sharkIsAttackingSet(aShark, false)
+        sharkIsBitingSet(aShark, false)
+        sharkNextAttackTimeSet(aShark, game.runtime() + randint(sharkAttackMin, sharkAttackMax) + randint(0, sharkAttackMin) / 2)
+        if (Math.percentChance(50)) {
+            aShark.left = scene.screenWidth() - 5
+            aShark.vx = 0 - randint(sharkSpeedXMin, sharkSpeedXMax)
+        } else {
+            aShark.right = 5
+            aShark.vx = randint(sharkSpeedXMin, sharkSpeedXMax)
+            aShark.setImage(sharkImagesRight[0])
+        }
+        setSharkAnimation(aShark, false)
+    }
+}
+function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
+    animation.stopAnimation(animation.AnimationTypes.All, aShark)
+    if (aShark.vx < 0) {
+        if (isAttacking) {
+            animation.runImageAnimation(
+            aShark,
+            sharkAttackImagesLeft,
+            getSharkAnimationSpeed(aShark),
+            true
+            )
+        } else {
+            animation.runImageAnimation(
+            aShark,
+            sharkImagesLeft,
+            getSharkAnimationSpeed(aShark),
+            true
+            )
+        }
+    } else {
+        if (isAttacking) {
+            animation.runImageAnimation(
+            aShark,
+            sharkAttackImagesRight,
+            getSharkAnimationSpeed(aShark),
+            true
+            )
+        } else {
+            animation.runImageAnimation(
+            aShark,
+            sharkImagesRight,
+            getSharkAnimationSpeed(aShark),
+            true
+            )
+        }
+    }
+}
+function fadeIn () {
+    color.startFade(color.Black, color.originalPalette, 1500)
+    color.pauseUntilFadeDone()
+}
+function fadeOut () {
+    color.startFade(color.originalPalette, color.Black, 1500)
+    color.pauseUntilFadeDone()
+}
+function setScene () {
     waveSpeedAdjustment = 0.8
     waveImages = [img`
         9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
@@ -656,22 +838,22 @@ function setScene () {
     }
 }
 function sharksAttack () {
-    for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (!(sharkIsAttackingGet(value)) && sharkNextAttackTimeGet(value) < game.runtime()) {
+    for (let value3 of sprites.allOfKind(SpriteKind.Enemy)) {
+        if (!(sharkIsAttackingGet(value3)) && sharkNextAttackTimeGet(value3) < game.runtime()) {
             timer.background(function () {
-                sharkIsAttackingSet(value, true)
-                setSharkAnimation(value, true)
+                sharkIsAttackingSet(value3, true)
+                setSharkAnimation(value3, true)
                 timer.background(function () {
-                    timer.after(getSharkAnimationSpeed(value) * (Math.min(sharkAttackImagesLeft.length, sharkAttackImagesRight.length) / 2), function () {
-                        sharkIsBitingSet(value, true)
+                    timer.after(getSharkAnimationSpeed(value3) * (Math.min(sharkAttackImagesLeft.length, sharkAttackImagesRight.length) / 2), function () {
+                        sharkIsBitingSet(value3, true)
                     })
                 })
                 timer.background(function () {
-                    timer.after(getSharkAnimationSpeed(value) * Math.min(sharkAttackImagesLeft.length, sharkAttackImagesRight.length), function () {
-                        sharkNextAttackTimeSet(value, game.runtime() + randint(sharkAttackMin, sharkAttackMax))
-                        sharkIsAttackingSet(value, false)
-                        sharkIsBitingSet(value, false)
-                        setSharkAnimation(value, false)
+                    timer.after(getSharkAnimationSpeed(value3) * Math.min(sharkAttackImagesLeft.length, sharkAttackImagesRight.length), function () {
+                        sharkNextAttackTimeSet(value3, game.runtime() + randint(sharkAttackMin, sharkAttackMax))
+                        sharkIsAttackingSet(value3, false)
+                        sharkIsBitingSet(value3, false)
+                        setSharkAnimation(value3, false)
                     })
                 })
             })
@@ -754,11 +936,16 @@ function hunterAttacks () {
         })
     }
 }
+function clearTitleScreen () {
+    for (let value4 of sprites.allOfKind(SpriteKind.Title)) {
+        value4.destroy()
+    }
+    sceneSprite.destroy()
+}
 function getNextSpawnTime () {
     return game.runtime() + randint(spawnTimeMin, spawnTimeMin)
 }
 function setGame () {
-    setScene()
     setPlayer()
     setEnemies()
     playMusic()
@@ -767,11 +954,11 @@ function sharkIsAttackingGet (aShark: Sprite) {
     return sprites.readDataBoolean(aShark, sharkIsAttacking)
 }
 function checkAttacks () {
-    for (let value2 of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (attacking && knife.overlapsWith(value2)) {
-            sharkDies(value2)
-        } else if (value2.overlapsWith(hunter)) {
-            sharkOverlapsPlayer(value2)
+    for (let value22 of sprites.allOfKind(SpriteKind.Enemy)) {
+        if (attacking && knife.overlapsWith(value22)) {
+            sharkDies(value22)
+        } else if (value22.overlapsWith(hunter)) {
+            sharkOverlapsPlayer(value22)
         }
     }
 }
@@ -1004,6 +1191,12 @@ let facingRight = false
 let sharkSpeedXMax = 0
 let aSharkAnimationSpeed = 0
 let aSharkSpeed = 0
+let title2: Sprite = null
+let title1: Sprite = null
+let title2Position: Sprite = null
+let title1Position: Sprite = null
+let showingIntroduction = false
+let sceneSprite: Sprite = null
 let attacking = false
 let kniveImagesRight: Image[] = []
 let knife: Sprite = null
@@ -1025,12 +1218,17 @@ let sharkImagesLeft: Image[] = []
 let sharkIsAttacking = ""
 let hunter: Sprite = null
 let dying = false
-setGame()
+showTitleScreen()
 game.onUpdate(function () {
-    adjustScene()
-    checkBreathing()
-    spawnEnemies()
-    sharksAttack()
-    checkAttacks()
-    setKnifePosition()
+    if (showingIntroduction) {
+        adjustScene(sceneSprite)
+    } else {
+        adjustScene(hunter)
+        checkBreathing()
+        spawnEnemies()
+        sharksAttack()
+        checkAttacks()
+        setKnifePosition()
+    }
 })
+
