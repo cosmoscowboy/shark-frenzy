@@ -240,8 +240,8 @@ function setSharkProperties () {
     sharkIsAttacking = "dataSharkIsAttacking"
     sharkIsBiting = "dataSharkIsBiting"
     sharkNextAttackTime = "dataSharkNextAttackTime"
-    sharkAttackMin = 500
-    sharkAttackMax = 3000
+    sharkAttackMin = 200
+    sharkAttackMax = 1750
     sharkAnimationSpeed = 200
 }
 function setPlayerPosition () {
@@ -887,8 +887,8 @@ function sharksAttack () {
     }
 }
 function setEnemies () {
-    spawnTimeMin = 1500
-    spawnTimeMax = 5000
+    spawnTimeMin = 750
+    spawnTimeMax = 1500
     nextTimeToSpawnEnemies = getNextSpawnTime()
     sharkSpeedXMin = 17
     sharkSpeedXMax = 27
@@ -969,7 +969,7 @@ function clearTitleScreen () {
     sceneSprite.destroy()
 }
 function getNextSpawnTime () {
-    return game.runtime() + randint(spawnTimeMin, spawnTimeMin)
+    return game.runtime() + randint(spawnTimeMin, spawnTimeMax)
 }
 function showInstructions () {
     fadeIn()
