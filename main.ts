@@ -45,6 +45,28 @@ function playMusic () {
         music.playMelody(music.convertRTTTLToMelody("Jaws:d=4,o=5,b=112:e,8f,2p,e,8f,2p,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8p,16p,16d#,16g,2c#6,2p,16d#,16g,16c#6,16d#6,16a#,16d#,2c#"), 224)
     })
 }
+function spawnLives () {
+    if (nextSpawnTimeLives < game.runtime() && !(dying)) {
+        nextSpawnTimeLives = getNextSpawnTime(lifeSpawnTimeMin, lifeSpawnTimeMax)
+        aLife = sprites.create(lifeImages[0], SpriteKind.Food)
+        aLife.y = scene.screenHeight() - aLife.height
+        aLife.setFlag(SpriteFlag.AutoDestroy, true)
+        aLife.z = aLife.y
+        if (Math.percentChance(50)) {
+            aLife.left = scene.screenWidth() - 5
+            aLife.vx = 0 - randint(lifeSpeedXMin, lifeSpeedXMax)
+        } else {
+            aLife.right = 5
+            aLife.vx = randint(lifeSpeedXMin, lifeSpeedXMax)
+        }
+        animation.runImageAnimation(
+        aLife,
+        lifeImages,
+        lifeAnimationSpeed,
+        true
+        )
+    }
+}
 function setSharkProperties () {
     sharkImagesLeft = [img`
         .............ccfff..............
@@ -723,7 +745,7 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 function spawnEnemies () {
     if (nextTimeToSpawnEnemies < game.runtime() && !(dying)) {
-        nextTimeToSpawnEnemies = getNextSpawnTime()
+        nextTimeToSpawnEnemies = getNextSpawnTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
         aShark = sprites.create(sharkImagesLeft[0], SpriteKind.Enemy)
         aShark.top = randint(yMin, scene.screenHeight() - aShark.height)
         aShark.setFlag(SpriteFlag.AutoDestroy, true)
@@ -887,9 +909,9 @@ function sharksAttack () {
     }
 }
 function setEnemies () {
-    spawnTimeMin = 750
-    spawnTimeMax = 1500
-    nextTimeToSpawnEnemies = getNextSpawnTime()
+    sharkSpawnTimeMin = 750
+    sharkSpawnTimeMax = 1500
+    nextTimeToSpawnEnemies = getNextSpawnTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
     sharkSpeedXMin = 17
     sharkSpeedXMax = 27
 }
@@ -968,8 +990,8 @@ function clearTitleScreen () {
     }
     sceneSprite.destroy()
 }
-function getNextSpawnTime () {
-    return game.runtime() + randint(spawnTimeMin, spawnTimeMax)
+function getNextSpawnTime (min: number, max: number) {
+    return game.runtime() + randint(min, max)
 }
 function showInstructions () {
     fadeIn()
@@ -980,6 +1002,7 @@ function showInstructions () {
 }
 function setGame () {
     setEnemies()
+    setLifeItems()
     playMusic()
 }
 function sharkIsAttackingGet (aShark: Sprite) {
@@ -993,6 +1016,13 @@ function checkAttacks () {
             sharkOverlapsPlayer(value22)
         }
     }
+    for (let value22 of sprites.allOfKind(SpriteKind.Food)) {
+        if (attacking && knife.overlapsWith(value22)) {
+            music.powerUp.play()
+            info.changeLifeBy(1)
+            value22.destroy(effects.hearts, 750)
+        }
+    }
 }
 function setPlayerVariables () {
     swimmingSpeedX = 30
@@ -1003,7 +1033,7 @@ function setPlayerVariables () {
     info.setScore(0)
     sceneIncreaseSpeed = 0
     lastTimeNotTakingAir = game.runtime()
-    loseHealthPerMilliseconds = 250
+    loseHealthPerMilliseconds = 200
     attacking = false
     takingAir = true
     facingRight = true
@@ -1191,6 +1221,124 @@ function setPlayerVariables () {
         knifeImagesLeft[index6] = anImage
     }
 }
+function setLifeItems () {
+    lifeSpawnTimeMin = 5000
+    lifeSpawnTimeMax = 10000
+    nextSpawnTimeLives = getNextSpawnTime(lifeSpawnTimeMin, lifeSpawnTimeMax)
+    lifeSpeedXMin = 27
+    lifeSpeedXMax = 35
+    lifeImages = [
+    img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . c c c c c c c c . . . . 
+        . . c c b b 3 b 3 3 b b c c . . 
+        . c 3 3 b 3 3 b 3 3 3 b 3 3 c . 
+        c d d b 3 3 b 3 3 b 3 3 b d d c 
+        f c c c d d c d d c d d c c c f 
+        f b 3 c c c b c c b c c c 3 b f 
+        . c b b 3 3 b 3 3 b 3 3 b b c . 
+        . . f f f f f f f f f f f f . . 
+        `,
+    img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . c c c c c c c c . . . . 
+        . . c c b b 3 b 3 3 b b c c . . 
+        . c 3 3 b 3 3 b 3 3 3 b 3 3 c . 
+        c d d b 3 3 b 3 3 b 3 3 b d d c 
+        f c c c d d c d d c d d c c c f 
+        f b 3 c c c b c c b c c c 3 b f 
+        . c b b 3 3 b 3 3 b 3 3 b b c . 
+        . . f f f f f f f f f f f f . . 
+        `,
+    img`
+        . . . . . f c c c c f . . . . . 
+        . . c c f b b 3 3 b b f c c . . 
+        . c b 3 3 b b c c b b 3 3 b c . 
+        . f 3 c c c b c c b c c c 3 f . 
+        f c b b c c b c c b c c b b c f 
+        c 3 c c b c c c c c c b c c 3 c 
+        c 3 c c c c c c c c c c c c 3 c 
+        . f b b c c c c c c c c b b f . 
+        . . f b b c 8 9 9 8 c b b f . . 
+        . . c c c f 9 3 1 9 f c c c . . 
+        . c 3 f f f 9 3 3 9 f f f 3 c . 
+        c 3 f f f f 8 9 9 8 f f f f 3 c 
+        f 3 c c f f f f f f f f c c 3 f 
+        f b 3 c b b f b b f b b c 3 b f 
+        . c b b 3 3 b 3 3 b 3 3 b b c . 
+        . . f f f f f f f f f f f f . . 
+        `,
+    img`
+        . . . . . f c c c c f . . . . . 
+        . . c c f b b 3 3 b b f c c . . 
+        . c b 3 3 b b c c b b 3 3 b c . 
+        . f 3 c c c b c c b c c c 3 f . 
+        f c b b c c b c c b c c b b c f 
+        c 3 c c b c c c c c c b c c 3 c 
+        c 3 c c c c c c c c c c c c 3 c 
+        . f b b c c c c c c c c b b f . 
+        . . f b b c 8 9 9 8 c b b f . . 
+        . . c c c f 9 3 1 9 f c c c . . 
+        . c 3 f f f 9 3 3 9 f f f 3 c . 
+        c 3 f f f f 8 9 9 8 f f f f 3 c 
+        f 3 c c f f f f f f f f c c 3 f 
+        f b 3 c b b f b b f b b c 3 b f 
+        . c b b 3 3 b 3 3 b 3 3 b b c . 
+        . . f f f f f f f f f f f f . . 
+        `,
+    img`
+        . . . . . f c c c c f . . . . . 
+        . . c c f b b 3 3 b b f c c . . 
+        . c b 3 3 b b c c b b 3 3 b c . 
+        . f 3 c c c b c c b c c c 3 f . 
+        f c b b c c b c c b c c b b c f 
+        c 3 c c b c c c c c c b c c 3 c 
+        c 3 c c c c c c c c c c c c 3 c 
+        . f b b c c c c c c c c b b f . 
+        . . f b b c 8 9 9 8 c b b f . . 
+        . . c c c f 9 3 1 9 f c c c . . 
+        . c 3 f f f 9 3 3 9 f f f 3 c . 
+        c 3 f f f f 8 9 9 8 f f f f 3 c 
+        f 3 c c f f f f f f f f c c 3 f 
+        f b 3 c b b f b b f b b c 3 b f 
+        . c b b 3 3 b 3 3 b 3 3 b b c . 
+        . . f f f f f f f f f f f f . . 
+        `,
+    img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . c c c c c c c c . . . . 
+        . . c c b b 3 b 3 3 b b c c . . 
+        . c 3 3 b 3 3 b 3 3 3 b 3 3 c . 
+        c d d b 3 3 b 3 3 b 3 3 b d d c 
+        f c c c d d c d d c d d c c c f 
+        f b 3 c c c b c c b c c c 3 b f 
+        . c b b 3 3 b 3 3 b 3 3 b b c . 
+        . . f f f f f f f f f f f f . . 
+        `
+    ]
+    lifeAnimationSpeed = 200
+}
 function sharkNextAttackTimeGet (aShark: Sprite) {
     return sprites.readDataNumber(aShark, sharkNextAttackTime)
 }
@@ -1201,8 +1349,6 @@ let knifeImagesLeft: Image[] = []
 let attackingImagesLeft: Image[] = []
 let attackingImagesRight: Image[] = []
 let swimmingImagesLeft: Image[] = []
-let spawnTimeMax = 0
-let spawnTimeMin = 0
 let aCoralReef2: Sprite = null
 let coralReefs: Sprite[] = []
 let coralImages: Image[] = []
@@ -1211,6 +1357,8 @@ let waves: Sprite[] = []
 let waveImages: Image[] = []
 let sharkSpeedXMin = 0
 let aShark: Sprite = null
+let sharkSpawnTimeMax = 0
+let sharkSpawnTimeMin = 0
 let nextTimeToSpawnEnemies = 0
 let hunterAnimationSpeed = 0
 let dyingImagesRight: Image[] = []
@@ -1248,6 +1396,14 @@ let sharkAttackImagesRight: Image[] = []
 let sharkAttackImagesLeft: Image[] = []
 let sharkImagesRight: Image[] = []
 let sharkImagesLeft: Image[] = []
+let lifeAnimationSpeed = 0
+let lifeSpeedXMax = 0
+let lifeSpeedXMin = 0
+let lifeImages: Image[] = []
+let aLife: Sprite = null
+let lifeSpawnTimeMax = 0
+let lifeSpawnTimeMin = 0
+let nextSpawnTimeLives = 0
 let sharkIsAttacking = ""
 let hunter: Sprite = null
 let dying = false
@@ -1259,6 +1415,7 @@ game.onUpdate(function () {
         adjustScene(hunter)
         checkBreathing()
         spawnEnemies()
+        spawnLives()
         sharksAttack()
         checkAttacks()
         setKnifePosition()
