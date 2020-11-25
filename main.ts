@@ -428,6 +428,7 @@ function showTitleScreen () {
         ccc88878ccccc88888cccccc7788ccccc8888888888ccccccccc8888888888cccccc88888888cccccccccccc88888ccccccccccccccccccc8888ccccccc8888888cccccccc8ccccccccc88888ccccccc
         `)
     setScene()
+    setSharkProperties()
     fadeIn()
     title1Position = sprites.create(img`
         6 . . . . . . . . . . . . . . 6 
@@ -562,8 +563,34 @@ function showTitleScreen () {
     timer.after(500, function () {
         sceneSprite = title2
         title2.follow(title2Position, 175)
+        titleShark = sprites.create(img`
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            `, SpriteKind.Title)
+        titleShark.setPosition(scene.screenWidth() + titleShark.width, scene.screenHeight() - scene.screenHeight() / 4)
+        titleShark.vx = -70
+        animation.runImageAnimation(
+        titleShark,
+        sharkAttackImagesLeft,
+        sharkAnimationSpeed,
+        true
+        )
     })
-    timer.after(3000, function () {
+    timer.after(2000, function () {
         sceneSprite = title1
         title1Position.x = 0 - title1Position.width * 2
         timer.after(500, function () {
@@ -865,7 +892,6 @@ function setEnemies () {
     nextTimeToSpawnEnemies = getNextSpawnTime()
     sharkSpeedXMin = 17
     sharkSpeedXMax = 27
-    setSharkProperties()
 }
 function setPlayerAnimations () {
     character.loopFrames(
@@ -936,6 +962,7 @@ function hunterAttacks () {
     }
 }
 function clearTitleScreen () {
+    animation.stopAnimation(animation.AnimationTypes.All, titleShark)
     for (let value4 of sprites.allOfKind(SpriteKind.Title)) {
         value4.destroy()
     }
@@ -1196,6 +1223,7 @@ let facingRight = false
 let sharkSpeedXMax = 0
 let aSharkAnimationSpeed = 0
 let aSharkSpeed = 0
+let titleShark: Sprite = null
 let title2: Sprite = null
 let title1: Sprite = null
 let title2Position: Sprite = null
@@ -1223,8 +1251,6 @@ let sharkImagesLeft: Image[] = []
 let sharkIsAttacking = ""
 let hunter: Sprite = null
 let dying = false
-let settingInstructionsSeen = ""
-let showInstructionsAnswer = false
 showTitleScreen()
 game.onUpdate(function () {
     if (showingIntroduction) {
