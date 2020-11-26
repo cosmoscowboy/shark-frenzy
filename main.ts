@@ -46,6 +46,15 @@ function playMusic () {
         music.playMelody(music.convertRTTTLToMelody("Jaws:d=4,o=5,b=112:e,8f,2p,e,8f,2p,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8p,16p,16d#,16g,2c#6,2p,16d#,16g,16c#6,16d#6,16a#,16d#,2c#"), 224)
     })
 }
+function checkWavePositions () {
+    for (let aWave of sprites.allOfKind(SpriteKind.Wave)) {
+        if (aWave.right < 0) {
+            aWave.left = scene.screenWidth()
+        } else if (aWave.left > scene.screenWidth()) {
+            aWave.right = 0
+        }
+    }
+}
 function spawnLives () {
     if (nextSpawnTimeLives < game.runtime() && !(dying)) {
         nextSpawnTimeLives = getNextSpawnTime(lifeSpawnTimeMin, lifeSpawnTimeMax)
@@ -650,14 +659,6 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 function adjustScene (basedOnSprite: Sprite) {
-    for (let aWave of sprites.allOfKind(SpriteKind.Wave)) {
-        if (aWave.right < 0) {
-            aWave.left = scene.screenWidth()
-        } else if (aWave.left > scene.screenWidth()) {
-            aWave.right = 0
-        }
-        adjustSceneSpriteSpeed(aWave, waveSpeedAdjustment, basedOnSprite)
-    }
     for (let aCoralReef of sprites.allOfKind(SpriteKind.Coral)) {
         if (aCoralReef.right < 0) {
             aCoralReef.left = scene.screenWidth()
@@ -871,7 +872,7 @@ function setTrawler () {
         trawlerImagesLeft[index] = anImage
     }
     trawler = sprites.create(trawlerImagesRight[0], SpriteKind.Boat)
-    trawler.bottom = waves[0].y + 3
+    trawler.bottom = wavesBackground[0].y + 3
     character.loopFrames(
     trawler,
     trawlerImagesRight,
@@ -1009,7 +1010,7 @@ function fadeOut () {
     color.pauseUntilFadeDone()
 }
 function setScene () {
-    waveSpeedAdjustment = 0.8
+    waveSpeedForeground = 8
     waveImages = [img`
         ................................................................................................................................................................
         ................................................................................................................................................................
@@ -1031,14 +1032,40 @@ function setScene () {
         8888688888888886118118886888888888888888888888888888888888886888886888888868888888888618688888886118886888888888888111...186888888688888888888888888888888888688
         8888888888888888688888888888888888888888888888888888888888888888888888888888888888888868888888888688888888888888888888888888888888888888888888888888888888888888
         `]
+    waveImagesBackground = [img`
+        ...........................1..................111..........................................11..................1.............11..................1..............
+        ..11..1....1....1..........111..............11111.............1................1..........11..............111111..............11................11..11..........
+        ...1.....1.1111..........1.1181111..1.....11168811......11...111............1111.........1168............1188611..............1111..............16886111........
+        11611....1688611........1116888811.....1116668888611.....1111188111.......118886111111.1116886.11.....1111188861111.........1118811........111116888861111....11
+        88861118868888611....11116688888111...1886888888886888888811168866111....116888868886118868888661111.816888888868811.....111688886111111...1888688888868111..168
+        8888688888888886118118886888888888888888888888888888888888886888886888888868888888888618688888886118886888888888888111...186888888688888888888888888888888888688
+        8888888888888888688888888888888888888888888888888888888888888888888888888888888888888868888888888688888888888888888888888888888888888888888888888888888888888888
+        `, img`
+        ..1.........11.................................11...............1.........................1.......................................................1.............
+        ...1.......111............1.111............1111181..........11111..............11........11.............1...11.................11...............111..1..........
+        ..181....116811.........11111611.......111116668881.........16111...........11111......11168811........11888111..............111...1.........1118888811......1..
+        .1688..11168881........1111668881.....11116688888611......111688811.1......118661.....1666688811.....111688886111..........1116888111......1116688888661..1.....
+        8688881186888811.....1668868888811..1.88868888888861188881166888888661...881888661188816888888661...116668888866111.......1166688886611....886888888886611...186
+        8888888888888888888.116888888888811888888888888888868888886888888888668888888888881888888888888668881668888888866181.....816688888886688888888888888888661188868
+        8888888888888888888886888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+        `]
     waves = []
-    for (let index3 = 0; index3 <= waveImages.length - 1; index3++) {
+    wavesBackground = []
+    for (let index3 = 0; index3 <= 1; index3++) {
         aWave2 = sprites.create(waveImages[index3], SpriteKind.Wave)
+        aWave2.vx = waveSpeedForeground
         aWave2.setFlag(SpriteFlag.Ghost, true)
         aWave2.top = 17
-        aWave2.left = 0 + scene.screenWidth() * index3
+        aWave2.left = 0 - aWave2.width * index3
         aWave2.z = aWave2.y
         waves.push(aWave2)
+        aWave2 = sprites.create(waveImagesBackground[index3], SpriteKind.Wave)
+        aWave2.vx = 6
+        aWave2.setFlag(SpriteFlag.Ghost, true)
+        aWave2.top = 14
+        aWave2.left = 0 - aWave2.width * index3
+        aWave2.z = aWave2.y
+        wavesBackground.push(aWave2)
     }
     yMin = waves[0].bottom - 3
     coralSpeedAdjustment = 0.6
@@ -1576,7 +1603,10 @@ let aCoralReef2: Sprite = null
 let coralReefs: Sprite[] = []
 let coralImages: Image[] = []
 let aWave2: Sprite = null
+let waves: Sprite[] = []
+let waveImagesBackground: Image[] = []
 let waveImages: Image[] = []
+let waveSpeedForeground = 0
 let sharkSpeedXMin = 0
 let aShark: Sprite = null
 let sharkSpawnTimeMax = 0
@@ -1584,7 +1614,7 @@ let sharkSpawnTimeMin = 0
 let nextTimeToSpawnEnemies = 0
 let hunterAnimationSpeed = 0
 let dyingImagesRight: Image[] = []
-let waves: Sprite[] = []
+let wavesBackground: Sprite[] = []
 let trawlerImagesLeft: Image[] = []
 let trawlerImagesRight: Image[] = []
 let trawlerAnimationSpeed = 0
@@ -1592,7 +1622,6 @@ let loseHealthPerMilliseconds = 0
 let lastTimeNotTakingAir = 0
 let takingAir = false
 let coralSpeedAdjustment = 0
-let waveSpeedAdjustment = 0
 let facingRight = false
 let sharkSpeedXMax = 0
 let aSharkAnimationSpeed = 0
@@ -1637,9 +1666,8 @@ let hunter: Sprite = null
 let dying = false
 showTitleScreen()
 game.onUpdate(function () {
-    if (showingIntroduction) {
-        adjustScene(sceneSprite)
-    } else {
+    checkWavePositions()
+    if (!(showingIntroduction)) {
         adjustScene(hunter)
         checkBreathing()
         spawnEnemies()
