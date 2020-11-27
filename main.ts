@@ -317,7 +317,21 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 function trawlerDropsNet () {
-	
+    // Drop net
+    if (!(netIsDescending) && net.vy == 0) {
+        netIsDescending = true
+        net.setFlag(SpriteFlag.Invisible, false)
+        netTop.setFlag(SpriteFlag.Invisible, false)
+        net.y = trawler.bottom
+        netTop.bottom = net.top
+        net.vy = netSpeedY
+        netTop.vy = netSpeedY
+    } else {
+        netIsDescending = false
+        netTop.bottom = net.top
+        net.vy = 0 - netSpeedY
+        netTop.vy = 0 - netSpeedY
+    }
 }
 statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 10, function (status) {
     scene.cameraShake(4, 500)
@@ -702,7 +716,7 @@ function sharkIsBitingGet (aShark: Sprite) {
     return sprites.readDataBoolean(aShark, sharkIsBiting)
 }
 function setTrawler () {
-    trawlerSpeed = 15
+    trawlerSpeed = 10
     trawlerAnimationSpeed = 350
     trawlerImagesRight = [img`
         ................................................
@@ -895,6 +909,8 @@ function setTrawler () {
 function checkTrawlerPosition () {
     if (trawler.left > scene.screenWidth() || trawler.right < 0) {
         trawler.vx = 0 - trawler.vx
+        netTop.image.flipX()
+        net.image.flipX()
     }
 }
 function restartAfterDying () {
@@ -1016,6 +1032,9 @@ function fadeOut () {
     color.pauseUntilFadeDone()
 }
 function setTrawlerNet () {
+    netIsDescending = false
+    netHasShark = false
+    netSpeedY = 17
     net = sprites.create(img`
         .ccc.................cb.c....cc.b.cc........ccc.
         .c.cc..............cc..bbc.cccbb...c.......cc.c.
@@ -1042,8 +1061,29 @@ function setTrawlerNet () {
         ..............cccb...b..bccccbcc................
         .................cccccccc.......................
         `, SpriteKind.Net)
-    net.top = trawler.bottom
+    net.y = trawler.bottom
+    net.x = trawler.x
     netTop = sprites.create(img`
+        ...................c............................
+        ...................c............................
+        ...................ccc..........................
+        .....................c..........................
+        .....................cc.........................
+        .....................cc.........................
+        .....................c..........................
+        ...................ccc..........................
+        ..................cc............................
+        ..................c.............................
+        ..................cc............................
+        ...................c............................
+        ...................cc...........................
+        ....................cc..........................
+        ....................cc..........................
+        ....................c...........................
+        ...................cc...........................
+        ..................cc............................
+        ..................c.............................
+        ..................ccc...........................
         ....................c...........................
         ....................c...........................
         ...................cc...........................
@@ -1108,11 +1148,21 @@ function setTrawlerNet () {
         ...c.................c.........cc..........c....
         ..cc.................c........ccc..........c....
         .cc.................cc........c.cc.........cc...
-        .c..................ccc.......c.bc..........cc..
-        .c..................c.c......cc.bc..........cc..
+        .ccc................ccc.......c..c..........cc..
+        .c.c................c.c.......c..c.........ccc..
+        .c.cc...............c.c.......c..c.........c.c..
+        .c..c...............c.cc......c..cc........c.c..
+        .c..c..............cc..c......c...c.......cc.c..
+        .c..c..............c...c......c...c.......c..c..
+        .c..c..............c...c......c...c.......c..c..
         `, SpriteKind.NetTop)
-    netTop.bottom = netTop.top
+    netTop.bottom = net.top
+    net.setFlag(SpriteFlag.Invisible, true)
+    netTop.setFlag(SpriteFlag.Invisible, true)
 }
+controller.B.onEvent(ControllerButtonEvent.Released, function () {
+    trawlerDropsNet()
+})
 function setScene () {
     waveSpeedForeground = 8
     waveImages = [img`
@@ -1346,6 +1396,27 @@ function clearTitleScreen () {
 }
 function getNextSpawnTime (min: number, max: number) {
     return game.runtime() + randint(min, max)
+}
+function checkNetPosition () {
+    net.x = trawler.x
+    netTop.x = trawler.x
+    if (netIsDescending) {
+        net.z = trawler.z
+        netTop.z = trawler.z
+    } else if (false) {
+        net.z = scene.screenHeight() + 1
+        netTop.z = trawler.z
+    }
+    if (net.y < trawler.bottom) {
+        net.vy = 0
+        netTop.vy = 0
+        net.setFlag(SpriteFlag.Invisible, true)
+        netTop.setFlag(SpriteFlag.Invisible, true)
+    }
+    if (net.bottom >= scene.screenHeight()) {
+        net.vy = 0
+        netTop.vy = 0
+    }
 }
 function showInstructions () {
     fadeIn()
@@ -1711,8 +1782,7 @@ let waves: Sprite[] = []
 let waveImagesBackground: Image[] = []
 let waveImages: Image[] = []
 let waveSpeedForeground = 0
-let netTop: Sprite = null
-let net: Sprite = null
+let netHasShark = false
 let sharkSpeedXMin = 0
 let aShark: Sprite = null
 let sharkSpawnTimeMax = 0
@@ -1738,6 +1808,10 @@ let title1: Sprite = null
 let title2Position: Sprite = null
 let title1Position: Sprite = null
 let sceneSprite: Sprite = null
+let netSpeedY = 0
+let netTop: Sprite = null
+let net: Sprite = null
+let netIsDescending = false
 let showingIntroduction = false
 let attacking = false
 let trawlerSpeed = 0
@@ -1782,5 +1856,6 @@ game.onUpdate(function () {
         checkAttacks()
         setKnifePosition()
         checkTrawlerPosition()
+        checkNetPosition()
     }
 })
