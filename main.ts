@@ -9,8 +9,14 @@ namespace SpriteKind {
     export const NetTop = SpriteKind.create()
 }
 function sharkDies (aShark: Sprite) {
-    info.changeScoreBy(1)
-    aShark.destroy(effects.bubbles, 200)
+    if (!(canUseNet)) {
+        info.changeScoreBy(1)
+        aShark.destroy(effects.bubbles, 200)
+    } else {
+        aShark.vx = 0
+        sharkIsHurtSet(aShark, true)
+        setSharkAnimation(aShark, false)
+    }
     timer.background(function () {
         music.jumpUp.play()
     })
@@ -174,6 +180,8 @@ function setSharkProperties () {
         .............fffff..............
         `]
     sharkImagesRight = []
+    sharkImagesHurtLeft = []
+    sharkImagesHurtRight = []
     sharkAttackImagesLeft = [
     img`
         .................ccfff..............
@@ -289,6 +297,12 @@ function setSharkProperties () {
         anImage = sharkImagesLeft[index].clone()
         anImage.flipX()
         sharkImagesRight[index] = anImage
+        anImage = sharkImagesLeft[index].clone()
+        anImage.flipY()
+        sharkImagesHurtLeft[index] = anImage
+        anImage = sharkImagesRight[index].clone()
+        anImage.flipY()
+        sharkImagesHurtRight[index] = anImage
     }
     for (let index2 = 0; index2 <= sharkAttackImagesLeft.length - 1; index2++) {
         anImage = sharkAttackImagesLeft[index2].clone()
@@ -1051,6 +1065,13 @@ function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
             getSharkAnimationSpeed(aShark),
             true
             )
+        } else if (sharkIsHurtGet(aShark)) {
+            animation.runImageAnimation(
+            aShark,
+            sharkImagesHurtLeft,
+            getSharkAnimationSpeed(aShark),
+            true
+            )
         } else {
             animation.runImageAnimation(
             aShark,
@@ -1064,6 +1085,13 @@ function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
             animation.runImageAnimation(
             aShark,
             sharkAttackImagesRight,
+            getSharkAnimationSpeed(aShark),
+            true
+            )
+        } else if (sharkIsHurtGet(aShark)) {
+            animation.runImageAnimation(
+            aShark,
+            sharkImagesHurtRight,
             getSharkAnimationSpeed(aShark),
             true
             )
@@ -1343,7 +1371,8 @@ function setScene () {
 }
 function sharksAttack () {
     for (let value3 of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (!(sharkIsAttackingGet(value3)) && sharkNextAttackTimeGet(value3) < game.runtime()) {
+        // Check if shark can attack
+        if (!(sharkIsAttackingGet(value3)) && !(sharkIsHurtGet(value3)) && !(sharkIsCaughtGet(value3)) && sharkNextAttackTimeGet(value3) < game.runtime()) {
             timer.background(function () {
                 sharkIsAttackingSet(value3, true)
                 setSharkAnimation(value3, true)
@@ -1505,10 +1534,12 @@ function sharkIsAttackingGet (aShark: Sprite) {
 }
 function checkAttacks () {
     for (let value22 of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (attacking && knife.overlapsWith(value22)) {
-            sharkDies(value22)
-        } else if (value22.overlapsWith(hunter)) {
-            sharkOverlapsPlayer(value22)
+        if (!(sharkIsHurtGet(value22)) && !(sharkIsCaughtGet(value22))) {
+            if (attacking && knife.overlapsWith(value22)) {
+                sharkDies(value22)
+            } else if (value22.overlapsWith(hunter)) {
+                sharkOverlapsPlayer(value22)
+            }
         }
     }
     for (let value22 of sprites.allOfKind(SpriteKind.Food)) {
@@ -1909,6 +1940,8 @@ let sharkIsBiting = ""
 let anImage: Image = null
 let sharkAttackImagesRight: Image[] = []
 let sharkAttackImagesLeft: Image[] = []
+let sharkImagesHurtRight: Image[] = []
+let sharkImagesHurtLeft: Image[] = []
 let sharkImagesRight: Image[] = []
 let sharkImagesLeft: Image[] = []
 let lifeAnimationSpeed = 0
@@ -1922,11 +1955,11 @@ let nextSpawnTimeLives = 0
 let sharkSpawnTimeMax = 0
 let sharkSpawnTimeMin = 0
 let nextTimeToSpawnEnemies = 0
-let canUseNet = false
 let showingInstructions = false
 let sharkIsAttacking = ""
 let hunter: Sprite = null
 let dying = false
+let canUseNet = false
 showTitleScreen()
 game.onUpdate(function () {
     checkWavePositions()
