@@ -298,9 +298,15 @@ function setSharkProperties () {
     sharkIsAttacking = "dataSharkIsAttacking"
     sharkIsBiting = "dataSharkIsBiting"
     sharkNextAttackTime = "dataSharkNextAttackTime"
+    sharkIsHurt = "dataSharkIsHurt"
+    sharkIsCaught = "dataSharkIsCaught"
+    sharkAliveAfter = "dataSharkIsAliveAfter"
+    sharkSpeed = "dataSharkSpeed"
     sharkAttackMin = 200
     sharkAttackMax = 1750
     sharkAnimationSpeed = 200
+    sharkAliveAfterMin = 3000
+    sharkAliveAfterMax = 7000
 }
 function setPlayerPosition () {
     hunter.x = scene.screenWidth() / 2
@@ -374,6 +380,9 @@ function restart () {
         setPlayerPosition()
         playerHealth.value = 100
     })
+}
+function sharkSpeedGet (aShark: Sprite) {
+    return sprites.readDataNumber(aShark, sharkSpeed)
 }
 function showTitleScreen () {
     sceneSprite = sprites.create(img`
@@ -725,6 +734,9 @@ function adjustScene (basedOnSprite: Sprite) {
         adjustSceneSpriteSpeed(aCoralReef, coralSpeedAdjustment, basedOnSprite)
     }
 }
+function sharkAliveAfterGet (aShark: Sprite) {
+    return sprites.readDataNumber(aShark, sharkAliveAfter)
+}
 function checkBreathing () {
     if (hunter.y < yMin) {
         hunter.y = yMin
@@ -743,6 +755,9 @@ function checkBreathing () {
         }
     }
     hunter.z = hunter.y
+}
+function sharkIsHurtSet (aShark: Sprite, value: boolean) {
+    sprites.setDataBoolean(aShark, sharkIsHurt, value)
 }
 statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 0, function (status) {
     scene.cameraShake(4, 500)
@@ -952,6 +967,12 @@ function checkTrawlerPosition () {
         net.image.flipX()
     }
 }
+function sharkIsCaughtGet (aShark: Sprite) {
+    return sprites.readDataBoolean(aShark, sharkIsCaught)
+}
+function sharkAliveAfterSet (aShark: Sprite, value: number) {
+    sprites.setDataNumber(aShark, sharkAliveAfter, value)
+}
 function playerDies (byShark: boolean) {
     if (byShark) {
     	
@@ -1011,8 +1032,14 @@ function spawnEnemies () {
             aShark.vx = randint(sharkSpeedXMin, sharkSpeedXMax)
             aShark.setImage(sharkImagesRight[0])
         }
+        sharkSpeedSet(aShark, aShark.vx)
+        sharkIsHurtSet(aShark, false)
+        sharkIsCaughtSet(aShark, false)
         setSharkAnimation(aShark, false)
     }
+}
+function sharkIsHurtGet (aShark: Sprite) {
+    return sprites.readDataBoolean(aShark, sharkIsHurt)
 }
 function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
     animation.stopAnimation(animation.AnimationTypes.All, aShark)
@@ -1358,6 +1385,9 @@ function setPlayerAnimations () {
     character.rule(Predicate.MovingLeft)
     )
 }
+function sharkSpeedSet (aShark: Sprite, value: number) {
+    sprites.setDataNumber(aShark, sharkSpeed, value)
+}
 function setKnifePosition () {
     knife.top = hunter.top + 1
     if (facingRight) {
@@ -1411,6 +1441,9 @@ function hunterAttacks () {
             knife.setFlag(SpriteFlag.Invisible, true)
         })
     }
+}
+function sharkIsCaughtSet (aShark: Sprite, value: boolean) {
+    sprites.setDataBoolean(aShark, sharkIsCaught, value)
 }
 function clearTitleScreen () {
     animation.stopAnimation(animation.AnimationTypes.All, titleShark)
@@ -1862,9 +1895,15 @@ let swimmingSpeedY = 0
 let swimmingSpeedX = 0
 let swimmingImagesRight: Image[] = []
 let yMin = 0
+let sharkAliveAfterMax = 0
+let sharkAliveAfterMin = 0
 let sharkAnimationSpeed = 0
 let sharkAttackMax = 0
 let sharkAttackMin = 0
+let sharkSpeed = ""
+let sharkAliveAfter = ""
+let sharkIsCaught = ""
+let sharkIsHurt = ""
 let sharkNextAttackTime = ""
 let sharkIsBiting = ""
 let anImage: Image = null
