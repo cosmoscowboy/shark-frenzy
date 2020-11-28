@@ -56,17 +56,18 @@ function showNetInstructions () {
     timer.background(function () {
         pause(1000)
         game.showLongText("It seems you are good at this game.\\nThe world is depleting fish stocks, so this senseless killing must stop.\\nFrom now on you must injure the shark and use the net to catch it.", DialogLayout.Full)
-        pause(2000)
         game.showLongText("Press 'B' to lower the net, and 'B' again to raise it.", DialogLayout.Bottom)
         game.showLongText("Be quick, as the shark will regain its strength and swim away again.", DialogLayout.Bottom)
-        hunter.say("Ready?")
-        timer.after(1500, function () {
-            hunter.say("Go!")
-            timer.after(500, function () {
-                hunter.say("")
-                canUseNet = true
-                showingInstructions = false
-                nextTimeToSpawnEnemies = getNextSpawnTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
+        timer.background(function () {
+            hunter.say("Ready?")
+            timer.after(1500, function () {
+                hunter.say("Go!")
+                timer.after(500, function () {
+                    hunter.say("")
+                    canUseNet = true
+                    showingInstructions = false
+                    nextTimeToSpawnEnemies = getNextSpawnTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
+                })
             })
         })
     })
