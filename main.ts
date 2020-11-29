@@ -29,14 +29,14 @@ function sharkIsAttackingSet (aShark: Sprite, value: boolean) {
 }
 function sharksFrenzy () {
     for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (sharkIsHurtGet(value) || sharkIsCaughtGet(value)) {
-        	
-        } else {
+        if (sharkIsIncapicitated(value) == false) {
             if (value.vx < 0 && value.x < hunter.x || value.vx > 0 && value.x > hunter.x) {
                 value.vx = 0 - value.vx
                 setSharkAnimation(value, true)
             }
             value.follow(hunter, Math.abs(value.vx * 1.2))
+        } else {
+        	
         }
     }
 }
@@ -375,7 +375,6 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 function sharkDiesOrIsHurt (aShark: Sprite) {
     if (!(canUseNet)) {
-        info.changeScoreBy(1)
         aShark.destroy(effects.bubbles, 200)
     } else {
         aShark.vx = 0
@@ -384,6 +383,7 @@ function sharkDiesOrIsHurt (aShark: Sprite) {
         sharkIsHurtSet(aShark, true)
         setSharkAnimation(aShark, false)
     }
+    info.changeScoreBy(1)
     timer.background(function () {
         music.jumpUp.play()
     })
@@ -394,8 +394,9 @@ statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ,
 })
 function restart () {
     for (let value2 of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (!(sharkIsHurtGet(value2))) {
+        if (sharkIsIncapicitated(value2) == false) {
             value2.destroy(effects.bubbles, 500)
+        } else if (sharkIsHurtGet(value2)) {
             sharkWellAfterSet(value2, sharkWellAfterGet(value2) + 3000)
         }
     }
@@ -559,6 +560,7 @@ function showTitleScreen () {
     setScene()
     setSharkProperties()
     fadeIn()
+    titleSpeed = 225
     title1Position = sprites.create(img`
         6 . . . . . . . . . . . . . . 6 
         . 6 . . . . . . . . . . . . 6 . 
@@ -688,10 +690,10 @@ function showTitleScreen () {
         `, SpriteKind.Title)
     title2.left = scene.screenWidth()
     title2.y = title2Position.y
-    title1.follow(title1Position, 175)
+    title1.follow(title1Position, titleSpeed)
     timer.after(500, function () {
         sceneSprite = title2
-        title2.follow(title2Position, 175)
+        title2.follow(title2Position, titleSpeed)
         titleShark = sprites.create(img`
             ................................
             ................................
@@ -1076,6 +1078,9 @@ function spawnEnemies () {
         setSharkAnimation(aShark, false)
     }
 }
+function sharkIsIncapicitated (aShark: Sprite) {
+    return sharkIsHurtGet(aShark) || sharkIsCaughtGet(aShark)
+}
 function sharkIsHurtGet (aShark: Sprite) {
     return sprites.readDataBoolean(aShark, sharkIsHurt)
 }
@@ -1123,13 +1128,6 @@ function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
             getSharkAnimationSpeed(aShark),
             true
             )
-        } else if (sharkIsHurtGet(aShark)) {
-            animation.runImageAnimation(
-            aShark,
-            sharkImagesHurtLeft,
-            getSharkAnimationSpeed(aShark) * 2,
-            true
-            )
         } else {
             animation.runImageAnimation(
             aShark,
@@ -1138,18 +1136,11 @@ function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
             true
             )
         }
-    } else {
+    } else if (aShark.vx > 0) {
         if (isAttacking) {
             animation.runImageAnimation(
             aShark,
             sharkAttackImagesRight,
-            getSharkAnimationSpeed(aShark),
-            true
-            )
-        } else if (sharkIsHurtGet(aShark)) {
-            animation.runImageAnimation(
-            aShark,
-            sharkImagesHurtRight,
             getSharkAnimationSpeed(aShark),
             true
             )
@@ -1160,6 +1151,24 @@ function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
             getSharkAnimationSpeed(aShark),
             true
             )
+        }
+    } else {
+        if (sharkIsHurtGet(aShark) || sharkIsCaughtGet(aShark)) {
+            if (sharkSpeedGet(aShark) < 0) {
+                animation.runImageAnimation(
+                aShark,
+                sharkImagesHurtLeft,
+                getSharkAnimationSpeed(aShark) * 2,
+                true
+                )
+            } else if (sharkSpeedGet(aShark) > 0) {
+                animation.runImageAnimation(
+                aShark,
+                sharkImagesHurtRight,
+                getSharkAnimationSpeed(aShark),
+                true
+                )
+            }
         }
     }
 }
@@ -1172,7 +1181,7 @@ function fadeOut () {
     color.pauseUntilFadeDone()
 }
 function setTrawlerNet () {
-    canUseNetAfterScore = 3
+    canUseNetAfterScore = 1
     canUseNet = false
     netIsDescending = false
     netHasShark = false
@@ -1578,6 +1587,11 @@ function checkAttacks () {
             } else if (value222.overlapsWith(hunter)) {
                 sharkOverlapsPlayer(value222)
             }
+        } else if (sharkIsHurtGet(value222)) {
+            if (value222.overlapsWith(net)) {
+                sharkIsHurtSet(value222, false)
+                sharkIsCaughtSet(value222, true)
+            }
         }
     }
     for (let value223 of sprites.allOfKind(SpriteKind.Food)) {
@@ -1950,6 +1964,7 @@ let title2: Sprite = null
 let title1: Sprite = null
 let title2Position: Sprite = null
 let title1Position: Sprite = null
+let titleSpeed = 0
 let sceneSprite: Sprite = null
 let aSharkIsWellAfter = 0
 let showingIntroduction = false
