@@ -8,19 +8,6 @@ namespace SpriteKind {
     export const Net = SpriteKind.create()
     export const NetTop = SpriteKind.create()
 }
-function sharkDies (aShark: Sprite) {
-    if (!(canUseNet)) {
-        info.changeScoreBy(1)
-        aShark.destroy(effects.bubbles, 200)
-    } else {
-        aShark.vx = 0
-        sharkIsHurtSet(aShark, true)
-        setSharkAnimation(aShark, false)
-    }
-    timer.background(function () {
-        music.jumpUp.play()
-    })
-}
 function sharkOverlapsPlayer (aShark: Sprite) {
     if (!(dying)) {
         if (sharkIsBitingGet(aShark)) {
@@ -49,6 +36,9 @@ function sharksFrenzy () {
         value.follow(hunter, Math.abs(value.vx * 1.2))
     }
 }
+function getNextTime (min: number, max: number) {
+    return game.runtime() + randint(min, max)
+}
 function playMusic () {
     timer.background(function () {
         music.playMelody(music.convertRTTTLToMelody("Jaws:d=4,o=5,b=112:e,8f,2p,e,8f,2p,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8e,8f,8e,8f,8d,8e,8e,8f,8d,8e,8e,8f,8e,8f,8e,8f,8p,16p,16d#,16g,2c#6,2p,16d#,16g,16c#6,16d#6,16a#,16d#,2c#"), 224)
@@ -62,8 +52,8 @@ function showNetInstructions () {
     timer.background(function () {
         pause(1000)
         game.showLongText("It seems you are good at this game.\\nThe world is depleting fish stocks, so this senseless killing must stop.\\nFrom now on you must injure the shark and use the net to catch it.", DialogLayout.Full)
-        game.showLongText("Press 'B' to lower the net, and 'B' again to raise it.", DialogLayout.Bottom)
-        game.showLongText("Be quick, as the shark will regain its strength and swim away again.", DialogLayout.Bottom)
+        pause(200)
+        game.showLongText("Press 'B' to lower the net, and 'B' again to raise it.\\nBe quick, as the shark will regain its strength and swim away again.", DialogLayout.Full)
         timer.background(function () {
             hunter.say("Ready?")
             timer.after(1500, function () {
@@ -72,7 +62,7 @@ function showNetInstructions () {
                     hunter.say("")
                     canUseNet = true
                     showingInstructions = false
-                    nextTimeToSpawnEnemies = getNextSpawnTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
+                    nextTimeToSpawnEnemies = getNextTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
                 })
             })
         })
@@ -89,7 +79,7 @@ function checkWavePositions () {
 }
 function spawnLives () {
     if (nextSpawnTimeLives < game.runtime() && !(dying)) {
-        nextSpawnTimeLives = getNextSpawnTime(lifeSpawnTimeMin, lifeSpawnTimeMax)
+        nextSpawnTimeLives = getNextTime(lifeSpawnTimeMin, lifeSpawnTimeMax)
         aLife = sprites.create(lifeImages[0], SpriteKind.Food)
         aLife.y = scene.screenHeight() - aLife.height
         aLife.setFlag(SpriteFlag.AutoDestroy, true)
@@ -314,13 +304,13 @@ function setSharkProperties () {
     sharkNextAttackTime = "dataSharkNextAttackTime"
     sharkIsHurt = "dataSharkIsHurt"
     sharkIsCaught = "dataSharkIsCaught"
-    sharkAliveAfter = "dataSharkIsAliveAfter"
+    sharkWellAfter = "dataSharkIsAliveAfter"
     sharkSpeed = "dataSharkSpeed"
     sharkAttackMin = 200
     sharkAttackMax = 1750
     sharkAnimationSpeed = 200
-    sharkAliveAfterMin = 3000
-    sharkAliveAfterMax = 7000
+    sharkWellAfterMin = 3000
+    sharkWellAfterMax = 7000
 }
 function setPlayerPosition () {
     hunter.x = scene.screenWidth() / 2
@@ -379,6 +369,21 @@ function trawlerDropsNet () {
         }
     }
 }
+function sharkDiesOrIsHurt (aShark: Sprite) {
+    if (!(canUseNet)) {
+        info.changeScoreBy(1)
+        aShark.destroy(effects.bubbles, 200)
+    } else {
+        aShark.vx = 0
+        aSharkIsWellAfter = getNextTime(sharkWellAfterMin, sharkWellAfterMax)
+        sharkWellAfterSet(aShark, aSharkIsWellAfter)
+        sharkIsHurtSet(aShark, true)
+        setSharkAnimation(aShark, false)
+    }
+    timer.background(function () {
+        music.jumpUp.play()
+    })
+}
 statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Percentage, 10, function (status) {
     scene.cameraShake(4, 500)
     music.jumpDown.play()
@@ -394,6 +399,9 @@ function restart () {
         setPlayerPosition()
         playerHealth.value = 100
     })
+}
+function sharkWellAfterSet (aShark: Sprite, value: number) {
+    sprites.setDataNumber(aShark, sharkWellAfter, value)
 }
 function sharkSpeedGet (aShark: Sprite) {
     return sprites.readDataNumber(aShark, sharkSpeed)
@@ -748,9 +756,6 @@ function adjustScene (basedOnSprite: Sprite) {
         adjustSceneSpriteSpeed(aCoralReef, coralSpeedAdjustment, basedOnSprite)
     }
 }
-function sharkAliveAfterGet (aShark: Sprite) {
-    return sprites.readDataNumber(aShark, sharkAliveAfter)
-}
 function checkBreathing () {
     if (hunter.y < yMin) {
         hunter.y = yMin
@@ -784,7 +789,7 @@ function sharkIsBitingGet (aShark: Sprite) {
 }
 function setTrawler () {
     showingInstructions = false
-    trawlerSpeed = 10
+    trawlerSpeed = 20
     trawlerAnimationSpeed = 350
     trawlerImagesRight = [img`
         ................................................
@@ -975,7 +980,12 @@ function setTrawler () {
     setTrawlerNet()
 }
 function checkTrawlerPosition () {
-    if (trawler.left > scene.screenWidth() || trawler.right < 0) {
+    if (trawler.right > scene.screenWidth() || trawler.left < 0) {
+        if (trawler.right > scene.screenWidth()) {
+            trawler.right = scene.screenWidth() - 1
+        } else if (trawler.left < 0) {
+            trawler.left = 1
+        }
         trawler.vx = 0 - trawler.vx
         netTop.image.flipX()
         net.image.flipX()
@@ -983,9 +993,6 @@ function checkTrawlerPosition () {
 }
 function sharkIsCaughtGet (aShark: Sprite) {
     return sprites.readDataBoolean(aShark, sharkIsCaught)
-}
-function sharkAliveAfterSet (aShark: Sprite, value: number) {
-    sprites.setDataNumber(aShark, sharkAliveAfter, value)
 }
 function playerDies (byShark: boolean) {
     if (byShark) {
@@ -1030,7 +1037,7 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 function spawnEnemies () {
     if (nextTimeToSpawnEnemies < game.runtime() && !(dying)) {
-        nextTimeToSpawnEnemies = getNextSpawnTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
+        nextTimeToSpawnEnemies = getNextTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
         aShark = sprites.create(sharkImagesLeft[0], SpriteKind.Enemy)
         aShark.top = randint(yMin, scene.screenHeight() - aShark.height)
         aShark.setFlag(SpriteFlag.AutoDestroy, true)
@@ -1055,6 +1062,9 @@ function spawnEnemies () {
 function sharkIsHurtGet (aShark: Sprite) {
     return sprites.readDataBoolean(aShark, sharkIsHurt)
 }
+function sharkWellAfterGet (aShark: Sprite) {
+    return sprites.readDataNumber(aShark, sharkWellAfter)
+}
 function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
     animation.stopAnimation(animation.AnimationTypes.All, aShark)
     if (aShark.vx < 0) {
@@ -1069,7 +1079,7 @@ function setSharkAnimation (aShark: Sprite, isAttacking: boolean) {
             animation.runImageAnimation(
             aShark,
             sharkImagesHurtLeft,
-            getSharkAnimationSpeed(aShark),
+            getSharkAnimationSpeed(aShark) * 2,
             true
             )
         } else {
@@ -1390,13 +1400,15 @@ function sharksAttack () {
                     })
                 })
             })
+        } else {
+        	
         }
     }
 }
 function setEnemies () {
     sharkSpawnTimeMin = 750
     sharkSpawnTimeMax = 1500
-    nextTimeToSpawnEnemies = getNextSpawnTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
+    nextTimeToSpawnEnemies = getNextTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
     sharkSpeedXMin = 17
     sharkSpeedXMax = 27
 }
@@ -1481,9 +1493,6 @@ function clearTitleScreen () {
     }
     sceneSprite.destroy()
 }
-function getNextSpawnTime (min: number, max: number) {
-    return game.runtime() + randint(min, max)
-}
 function checkNetPosition () {
     net.x = trawler.x
     netTop.x = trawler.x
@@ -1536,7 +1545,7 @@ function checkAttacks () {
     for (let value22 of sprites.allOfKind(SpriteKind.Enemy)) {
         if (!(sharkIsHurtGet(value22)) && !(sharkIsCaughtGet(value22))) {
             if (attacking && knife.overlapsWith(value22)) {
-                sharkDies(value22)
+                sharkDiesOrIsHurt(value22)
             } else if (value22.overlapsWith(hunter)) {
                 sharkOverlapsPlayer(value22)
             }
@@ -1754,7 +1763,7 @@ function setPlayerVariables () {
 function setLifeItems () {
     lifeSpawnTimeMin = 5000
     lifeSpawnTimeMax = 10000
-    nextSpawnTimeLives = getNextSpawnTime(lifeSpawnTimeMin, lifeSpawnTimeMax)
+    nextSpawnTimeLives = getNextTime(lifeSpawnTimeMin, lifeSpawnTimeMax)
     lifeSpeedXMin = 27
     lifeSpeedXMax = 35
     lifeImages = [
@@ -1911,6 +1920,7 @@ let title1: Sprite = null
 let title2Position: Sprite = null
 let title1Position: Sprite = null
 let sceneSprite: Sprite = null
+let aSharkIsWellAfter = 0
 let netSpeedY = 0
 let netTop: Sprite = null
 let net: Sprite = null
@@ -1926,13 +1936,13 @@ let swimmingSpeedY = 0
 let swimmingSpeedX = 0
 let swimmingImagesRight: Image[] = []
 let yMin = 0
-let sharkAliveAfterMax = 0
-let sharkAliveAfterMin = 0
+let sharkWellAfterMax = 0
+let sharkWellAfterMin = 0
 let sharkAnimationSpeed = 0
 let sharkAttackMax = 0
 let sharkAttackMin = 0
 let sharkSpeed = ""
-let sharkAliveAfter = ""
+let sharkWellAfter = ""
 let sharkIsCaught = ""
 let sharkIsHurt = ""
 let sharkNextAttackTime = ""
@@ -1955,11 +1965,11 @@ let nextSpawnTimeLives = 0
 let sharkSpawnTimeMax = 0
 let sharkSpawnTimeMin = 0
 let nextTimeToSpawnEnemies = 0
+let canUseNet = false
 let showingInstructions = false
 let sharkIsAttacking = ""
 let hunter: Sprite = null
 let dying = false
-let canUseNet = false
 showTitleScreen()
 game.onUpdate(function () {
     checkWavePositions()
