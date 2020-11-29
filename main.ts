@@ -29,14 +29,12 @@ function sharkIsAttackingSet (aShark: Sprite, value: boolean) {
 }
 function sharksFrenzy () {
     for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (sharkIsIncapicitated(value) == false) {
+        if (!(sharkIsIncapicitated(value))) {
             if (value.vx < 0 && value.x < hunter.x || value.vx > 0 && value.x > hunter.x) {
                 value.vx = 0 - value.vx
                 setSharkAnimation(value, true)
             }
             value.follow(hunter, Math.abs(value.vx * 1.2))
-        } else {
-        	
         }
     }
 }
@@ -75,16 +73,9 @@ function showNetInstructions () {
         pause(200)
         game.showLongText("Press 'B' to lower the net, and 'B' again to raise it. When the net hits the ocean floor it raises automatically.\\nBe quick, as the shark will regain its strength and swim away again.", DialogLayout.Full)
         timer.background(function () {
-            hunter.say("Ready?")
-            timer.after(1500, function () {
-                hunter.say("Go!")
-                timer.after(500, function () {
-                    hunter.say("")
-                    canUseNet = true
-                    showingInstructions = false
-                    nextTimeToSpawnEnemies = getNextTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
-                })
-            })
+            showingInstructions = false
+            canUseNet = true
+            nextTimeToSpawnEnemies = getNextTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
         })
     })
 }
@@ -394,20 +385,17 @@ statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ,
 })
 function restart () {
     for (let value2 of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (sharkIsIncapicitated(value2) == false) {
-            value2.destroy(effects.bubbles, 500)
-        } else if (sharkIsHurtGet(value2)) {
-            sharkWellAfterSet(value2, sharkWellAfterGet(value2) + 3000)
+        if (!(sharkIsIncapicitated(value2))) {
+            value2.follow(hunter, 0)
+            value2.destroy()
         }
     }
     for (let value22 of sprites.allOfKind(SpriteKind.Food)) {
         value22.destroy(effects.bubbles, 500)
     }
-    timer.after(1500, function () {
-        setPlayerPosition()
-        setKnifePosition()
-        playerHealth.value = 100
-    })
+    setPlayerPosition()
+    setKnifePosition()
+    playerHealth.value = 100
 }
 function sharkWellAfterSet (aShark: Sprite, value: number) {
     sprites.setDataNumber(aShark, sharkWellAfter, value)
@@ -1046,7 +1034,9 @@ function playerDies (byShark: boolean) {
     })
     timer.after(3000, function () {
         info.changeLifeBy(-1)
+        fadeOut()
         restart()
+        fadeIn()
     })
 }
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
