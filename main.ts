@@ -8,6 +8,9 @@ namespace SpriteKind {
     export const Net = SpriteKind.create()
     export const NetTop = SpriteKind.create()
 }
+function getCurrentHighScore () {
+    return "" + playerName + highScoreSeparator + convertToText(info.score())
+}
 function sharkOverlapsPlayer (aShark: Sprite) {
     if (!(dying)) {
         if (sharkIsBitingGet(aShark)) {
@@ -785,6 +788,20 @@ statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ,
         playerDies(false)
     }
 })
+function setHighScores () {
+    numberOfHighScoresToDisplay = 5
+    highScoreSeparator = " = "
+    highScoreValueSeparator = "\\n"
+    highScoreValues = []
+    blockSettings.clear()
+    if (blockSettings.exists(highScores)) {
+        rearrangeHighScores()
+    } else {
+        highScoreValues.push(getCurrentHighScore())
+        blockSettings.writeString(highScores, highScoreValues[0])
+    }
+    displayHighScores()
+}
 function sharkIsBitingGet (aShark: Sprite) {
     return sprites.readDataBoolean(aShark, sharkIsBiting)
 }
@@ -1034,6 +1051,7 @@ function playerDies (byShark: boolean) {
             if (!(canUseNet)) {
                 game.showLongText("Please try again.\\nWhen reaching a score of '" + convertToText(canUseNetAfterScore) + "', you can use a net to catch the sharks.\\nThe sharks will then be sent to countries requiring more food.", DialogLayout.Full)
             }
+            setHighScores()
         } else {
             fadeOut()
             restart()
@@ -1445,6 +1463,27 @@ function setEnemies () {
     sharkSpeedXMax = 27
     sharksCaughtInNet = []
 }
+function rearrangeHighScores () {
+    highScoreEntries = []
+    highScoreValues = blockSettings.readString(highScores).split(highScoreValueSeparator)
+    highScoreValues.push(getCurrentHighScore())
+    highScoresTemp = []
+    for (let value of highScoreValues) {
+        highScoresTemp.push(value)
+    }
+    highScoresTemp.push("")
+    for (let index = 0; index <= highScoreValues.length - 1; index++) {
+        aHighScoreValue = highScoreValues[index]
+        highScoreEntries = aHighScoreValue.split(highScoreValueSeparator)
+        aHighScore = parseFloat(highScoreEntries[1])
+        if (info.score() >= aHighScore) {
+            highScoresTemp[highScoresTemp.length] = aHighScoreValue
+            highScoresTemp[highScoresTemp.length] = aHighScoreValue
+        } else {
+        	
+        }
+    }
+}
 function setPlayerAnimations () {
     character.loopFrames(
     hunter,
@@ -1550,6 +1589,12 @@ function checkNetPosition () {
         }
     }
 }
+function displayHighScores () {
+    for (let value of highScoreValues) {
+        highScoreDialog = "" + highScoreDialog + ("" + value + highScoreValueSeparator)
+    }
+    game.showLongText("High scores\\n" + highScoreDialog, DialogLayout.Full)
+}
 function setNetPosition () {
     net.bottom = trawler.bottom - 6
     net.x = trawler.x
@@ -1559,7 +1604,13 @@ function setNetPosition () {
 }
 function showInstructions () {
     fadeIn()
-    game.showLongText("The ocean is rampant with killer sharks.", DialogLayout.Bottom)
+    if (game.ask("Enter your name?")) {
+        playerName = game.askForString("", 12)
+    }
+    if (playerName == "" || !(playerName)) {
+        playerName = "hunter"
+    }
+    game.showLongText("Hello " + playerName + ".\\nThe ocean is rampant with killer sharks.", DialogLayout.Bottom)
     game.showLongText("Use your knife to thwart those pesky carnivores.", DialogLayout.Bottom)
     setPlayer()
     setGame()
@@ -1612,7 +1663,7 @@ function setPlayerVariables () {
     swimmingSpeedX = 30
     swimmingSpeedY = 25
     hunterAnimationSpeed = 200
-    maxLives = 5
+    maxLives = 1
     info.setLife(maxLives)
     info.setScore(0)
     sceneIncreaseSpeed = 0
@@ -1929,10 +1980,15 @@ function sharkNextAttackTimeGet (aShark: Sprite) {
 let dyingImagesLeft: Image[] = []
 let sceneIncreaseSpeed = 0
 let maxLives = 0
+let highScoreDialog = ""
 let knifeImagesLeft: Image[] = []
 let attackingImagesLeft: Image[] = []
 let attackingImagesRight: Image[] = []
 let swimmingImagesLeft: Image[] = []
+let aHighScore = 0
+let aHighScoreValue = ""
+let highScoresTemp: string[] = []
+let highScoreEntries: string[] = []
 let sharksCaughtInNet: Sprite[] = []
 let aCoralReef2: Sprite = null
 let coralReefs: Sprite[] = []
@@ -1953,6 +2009,10 @@ let trawlerImagesLeft: Image[] = []
 let trawlerImagesRight: Image[] = []
 let trawlerAnimationSpeed = 0
 let trawlerSpeedCurrent = 0
+let highScores = ""
+let highScoreValues: string[] = []
+let highScoreValueSeparator = ""
+let numberOfHighScoresToDisplay = 0
 let loseHealthPerMilliseconds = 0
 let lastTimeNotTakingAir = 0
 let takingAir = false
@@ -2017,6 +2077,8 @@ let net: Sprite = null
 let sharkIsAttacking = ""
 let hunter: Sprite = null
 let dying = false
+let highScoreSeparator = ""
+let playerName = ""
 showTitleScreen()
 game.onUpdate(function () {
     checkWavePositions()
