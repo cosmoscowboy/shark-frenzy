@@ -1442,6 +1442,7 @@ function setEnemies () {
     nextTimeToSpawnEnemies = getNextTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
     sharkSpeedXMin = 17
     sharkSpeedXMax = 27
+    sharksCaughtInNet = []
 }
 function setPlayerAnimations () {
     character.loopFrames(
@@ -1536,6 +1537,7 @@ function checkNetPosition () {
     }
     if (net.y < trawler.bottom) {
         hideNet()
+        hawlInSharks()
         trawler.vx = trawlerSpeedCurrent
     }
     if (net.bottom >= scene.screenHeight()) {
@@ -1571,7 +1573,7 @@ function sharkIsAttackingGet (aShark: Sprite) {
 }
 function checkAttacks () {
     for (let value222 of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (!(sharkIsHurtGet(value222)) && !(sharkIsCaughtGet(value222))) {
+        if (!(sharkIsIncapicitated(value222))) {
             if (attacking && knife.overlapsWith(value222)) {
                 sharkDiesOrIsHurt(value222)
             } else if (value222.overlapsWith(hunter)) {
@@ -1581,6 +1583,8 @@ function checkAttacks () {
             if (value222.overlapsWith(net)) {
                 sharkIsHurtSet(value222, false)
                 sharkIsCaughtSet(value222, true)
+                value222.follow(net, netSpeedY)
+                sharksCaughtInNet.push(value222)
             }
         }
     }
@@ -1595,6 +1599,13 @@ function checkAttacks () {
 function setTrawlerPosition () {
     trawler.x = scene.screenWidth() / 2
     trawler.bottom = wavesBackground[0].y + 3
+}
+function hawlInSharks () {
+    for (let value of sharksCaughtInNet) {
+        info.changeScoreBy(2)
+        value.destroy()
+    }
+    sharksCaughtInNet = []
 }
 function setPlayerVariables () {
     swimmingSpeedX = 30
@@ -1921,6 +1932,7 @@ let knifeImagesLeft: Image[] = []
 let attackingImagesLeft: Image[] = []
 let attackingImagesRight: Image[] = []
 let swimmingImagesLeft: Image[] = []
+let sharksCaughtInNet: Sprite[] = []
 let aCoralReef2: Sprite = null
 let coralReefs: Sprite[] = []
 let coralImages: Image[] = []
