@@ -69,14 +69,12 @@ function showNetInstructions () {
     setNetPosition()
     timer.background(function () {
         pause(1000)
-        game.showLongText("It seems you are good at this game.\\nThe world is depleting fish stocks, so this senseless killing must stop.\\nFrom now on you must injure the shark and use the net to catch it.", DialogLayout.Full)
+        game.showLongText("You are good at this game.\\nUnfortunately, fish stocks are depleting, so this senseless killing must stop.\\nFrom now on you must injure the shark and use the net to catch it.", DialogLayout.Full)
         pause(200)
         game.showLongText("Press 'B' to lower the net, and 'B' again to raise it. When the net hits the ocean floor it raises automatically.\\nBe quick, as the shark will regain its strength and swim away again.", DialogLayout.Full)
-        timer.background(function () {
-            showingInstructions = false
-            canUseNet = true
-            nextTimeToSpawnEnemies = getNextTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
-        })
+        showingInstructions = false
+        canUseNet = true
+        nextTimeToSpawnEnemies = getNextTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
     })
 }
 function checkWavePositions () {
@@ -366,15 +364,14 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 function sharkDiesOrIsHurt (aShark: Sprite) {
     if (!(canUseNet)) {
+        info.changeScoreBy(1)
         aShark.destroy(effects.bubbles, 200)
     } else {
         aShark.vx = 0
-        aSharkIsWellAfter = getNextTime(sharkWellAfterMin, sharkWellAfterMax)
-        sharkWellAfterSet(aShark, aSharkIsWellAfter)
+        sharkWellAfterSet(aShark, getNextTime(sharkWellAfterMin, sharkWellAfterMax))
         sharkIsHurtSet(aShark, true)
         setSharkAnimation(aShark, false)
     }
-    info.changeScoreBy(1)
     timer.background(function () {
         music.jumpUp.play()
     })
@@ -1033,6 +1030,11 @@ function playerDies (byShark: boolean) {
         music.powerDown.play()
     })
     timer.after(3000, function () {
+        if (info.life() == 1) {
+            if (!(canUseNet)) {
+                game.showLongText("Please try again.\\nWhen reaching a score of '" + convertToText(canUseNetAfterScore) + "', you can use a net to catch the sharks.\\nThe sharks will then be sent to countries requiring more food.", DialogLayout.Full)
+            }
+        }
         info.changeLifeBy(-1)
         fadeOut()
         restart()
@@ -1095,13 +1097,11 @@ function sharksActions () {
                     })
                 })
             })
-        } else if (sharkIsHurtGet(value3)) {
+        } else if (sharkIsHurtGet(value3) && !(sharkIsCaughtGet(value3))) {
             if (timeHasPassed(sharkWellAfterGet(value3))) {
                 sharkIsHurtSet(value3, false)
                 value3.vx = sharkSpeedGet(value3)
             }
-        } else {
-        	
         }
     }
 }
@@ -1611,7 +1611,7 @@ function setPlayerVariables () {
     swimmingSpeedX = 30
     swimmingSpeedY = 25
     hunterAnimationSpeed = 200
-    maxLives = 5
+    maxLives = 1
     info.setLife(maxLives)
     info.setScore(0)
     sceneIncreaseSpeed = 0
@@ -1943,9 +1943,9 @@ let waveImagesBackground: Image[] = []
 let waveImages: Image[] = []
 let waveSpeedForeground = 0
 let netHasShark = false
-let canUseNetAfterScore = 0
 let sharkSpeedXMin = 0
 let aShark: Sprite = null
+let canUseNetAfterScore = 0
 let hunterAnimationSpeed = 0
 let dyingImagesRight: Image[] = []
 let trawlerImagesLeft: Image[] = []
@@ -1968,7 +1968,6 @@ let title2Position: Sprite = null
 let title1Position: Sprite = null
 let titleSpeed = 0
 let sceneSprite: Sprite = null
-let aSharkIsWellAfter = 0
 let showingIntroduction = false
 let attacking = false
 let trawlerSpeed = 0
