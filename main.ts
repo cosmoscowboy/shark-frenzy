@@ -1714,7 +1714,7 @@ function setPlayerVariables () {
     swimmingSpeedX = 30
     swimmingSpeedY = 25
     hunterAnimationSpeed = 200
-    maxLives = 1
+    maxLives = 5
     info.setLife(maxLives)
     info.setScore(0)
     sceneIncreaseSpeed = 0
