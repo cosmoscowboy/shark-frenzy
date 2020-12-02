@@ -794,11 +794,11 @@ function setHighScores () {
     highScoreValueSeparator = "\\n"
     highScoreValues = []
     blockSettings.clear()
-    if (blockSettings.exists(highScores)) {
+    if (blockSettings.exists(settingHighScores)) {
         rearrangeHighScores()
     } else {
         highScoreValues.push(getCurrentHighScore())
-        blockSettings.writeString(highScores, highScoreValues[0])
+        blockSettings.writeString(settingHighScores, highScoreValues[0])
     }
     displayHighScores()
 }
@@ -1463,26 +1463,68 @@ function setEnemies () {
     sharkSpeedXMax = 27
     sharksCaughtInNet = []
 }
+/**
+ * - Get current value at index and place in last position in temp
+ * 
+ * - Set the current score at the index in temp
+ * 
+ * - If the number of steps is greater than one, shift the other entries.
+ * 
+ *   - set the last value to the second last value
+ * 
+ *   - increase the index
+ * 
+ *   - get the next value at index and place at the last position in temp
+ * 
+ *   - get the second last entry and place at this index
+ */
 function rearrangeHighScores () {
+    shuffleHighScores = false
+    shuffleHighScoresAtIndex = 0
+    shuffleNumberOfTimes = 0
     highScoreEntries = []
-    highScoreValues = blockSettings.readString(highScores).split(highScoreValueSeparator)
-    highScoreValues.push(getCurrentHighScore())
+    highScoreValues = blockSettings.readString(settingHighScores).split(highScoreValueSeparator)
     highScoresTemp = []
     for (let value of highScoreValues) {
         highScoresTemp.push(value)
     }
+    highScoresTemp.push("")
     highScoresTemp.push("")
     for (let index = 0; index <= highScoreValues.length - 1; index++) {
         aHighScoreValue = highScoreValues[index]
         highScoreEntries = aHighScoreValue.split(highScoreValueSeparator)
         aHighScore = parseFloat(highScoreEntries[1])
         if (info.score() >= aHighScore) {
-            highScoresTemp[highScoresTemp.length] = aHighScoreValue
-            highScoresTemp[highScoresTemp.length] = aHighScoreValue
-        } else {
-        	
+            if (!(shuffleHighScores)) {
+                shuffleHighScores = true
+                shuffleHighScoresAtIndex = index
+            }
         }
     }
+    if (shuffleHighScores) {
+        shuffleNumberOfTimes = highScoreValues.length - shuffleHighScoresAtIndex
+        aHighScoreValue = highScoreValues[shuffleHighScoresAtIndex]
+        highScoresTemp[highScoresTemp.length - 1] = aHighScoreValue
+        highScoreValues[shuffleHighScoresAtIndex] = getCurrentHighScore()
+        if (shuffleNumberOfTimes > 1) {
+            for (let index = 0; index < shuffleNumberOfTimes; index++) {
+                highScoresTemp[highScoresTemp.length - 2] = highScoresTemp[highScoresTemp.length - 1]
+                shuffleHighScoresAtIndex += 1
+                aHighScoreValue = highScoreValues[shuffleHighScoresAtIndex]
+                highScoresTemp[highScoresTemp.length - 1] = aHighScoreValue
+                highScoreValues[shuffleHighScoresAtIndex] = highScoresTemp[highScoresTemp.length - 2]
+            }
+        }
+    }
+    if (highScoreValues.length > 5) {
+        highScoresTemp = []
+        for (let index = 0; index <= 4; index++) {
+            highScoresTemp[index] = highScoreValues[index]
+        }
+        highScoreValues = highScoresTemp
+    }
+    highScoresSettingValue = "" + highScoreValues + "\\n"
+    blockSettings.writeString(settingHighScores, highScoresSettingValue)
 }
 function setPlayerAnimations () {
     character.loopFrames(
@@ -1590,10 +1632,7 @@ function checkNetPosition () {
     }
 }
 function displayHighScores () {
-    for (let value of highScoreValues) {
-        highScoreDialog = "" + highScoreDialog + ("" + value + highScoreValueSeparator)
-    }
-    game.showLongText("High scores\\n" + highScoreDialog, DialogLayout.Full)
+    game.showLongText("High scores\\n" + getHighScoreValuesJoined(), DialogLayout.Full)
 }
 function setNetPosition () {
     net.bottom = trawler.bottom - 6
@@ -1651,6 +1690,12 @@ function checkAttacks () {
 function setTrawlerPosition () {
     trawler.x = scene.screenWidth() / 2
     trawler.bottom = wavesBackground[0].y + 3
+}
+function getHighScoreValuesJoined () {
+    for (let value of highScoreValues) {
+        highScoreDialog = "" + highScoreDialog + ("" + value + highScoreValueSeparator)
+    }
+    return ""
 }
 function hawlInSharks () {
     for (let value of sharksCaughtInNet) {
@@ -1985,10 +2030,14 @@ let knifeImagesLeft: Image[] = []
 let attackingImagesLeft: Image[] = []
 let attackingImagesRight: Image[] = []
 let swimmingImagesLeft: Image[] = []
+let highScoresSettingValue = ""
 let aHighScore = 0
 let aHighScoreValue = ""
 let highScoresTemp: string[] = []
 let highScoreEntries: string[] = []
+let shuffleNumberOfTimes = 0
+let shuffleHighScoresAtIndex = 0
+let shuffleHighScores = false
 let sharksCaughtInNet: Sprite[] = []
 let aCoralReef2: Sprite = null
 let coralReefs: Sprite[] = []
@@ -2009,7 +2058,7 @@ let trawlerImagesLeft: Image[] = []
 let trawlerImagesRight: Image[] = []
 let trawlerAnimationSpeed = 0
 let trawlerSpeedCurrent = 0
-let highScores = ""
+let settingHighScores = ""
 let highScoreValues: string[] = []
 let highScoreValueSeparator = ""
 let numberOfHighScoresToDisplay = 0
