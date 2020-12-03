@@ -769,9 +769,26 @@ function checkBreathing () {
             takingAir = true
             lastTimeNotTakingAir = game.runtime()
             playerHealth.value = 100
+            if (!(firstTimeRecoveringBreath) && firstTimeUnderWater) {
+                firstTimeRecoveringBreath = true
+                timer.background(function () {
+                    hunter.say("That is better.")
+                    timer.after(1000, function () {
+                        hunter.say("")
+                    })
+                })
+            }
         }
     } else if (hunter.y > yMin + 2) {
         takingAir = false
+        if (!(firstTimeUnderWater)) {
+            firstTimeUnderWater = true
+            timer.background(function () {
+                timer.after(1000, function () {
+                    hunter.say("I need air")
+                })
+            })
+        }
     }
     if (!(takingAir) && !(dying)) {
         if (lastTimeNotTakingAir + loseHealthPerMilliseconds < game.runtime()) {
@@ -1054,7 +1071,7 @@ function playerDies (byShark: boolean) {
             if (!(canUseNet)) {
                 game.showLongText("Please try again.\\nWhen reaching a score of '" + convertToText(canUseNetAfterScore) + "', you can use the boat and a net to catch the sharks.\\nThe sharks will then be sent to families that that have less food.", DialogLayout.Full)
             }
-            game.showLongText("I am glad you are having fun playing this game.\\n" + "Do remember that this IS just a game and that the sharks ARE NOT real.", DialogLayout.Full)
+            game.showLongText("I am glad you are having fun playing this game.\\n" + "Do remember that this IS just a game and that the sharks ARE NOT real; well maybe just a little bit ;-)", DialogLayout.Full)
             setHighScores()
         } else {
             fadeOut()
@@ -1194,7 +1211,7 @@ function fadeOut () {
     color.pauseUntilFadeDone()
 }
 function setTrawlerNet () {
-    canUseNetAfterScore = 1
+    canUseNetAfterScore = 30
     canUseNet = false
     netIsDescending = false
     netHasShark = false
@@ -2034,8 +2051,6 @@ function sharkNextAttackTimeGet (aShark: Sprite) {
     return sprites.readDataNumber(aShark, sharkNextAttackTime)
 }
 let dyingImagesLeft: Image[] = []
-let firstTimeRecoveringBreath = false
-let firstTimeUnderWater = false
 let sceneIncreaseSpeed = 0
 let maxLives = 0
 let highScoresSettingValue = ""
@@ -2076,6 +2091,8 @@ let highScoreValueSeparator = ""
 let numberOfHighScoresToDisplay = 0
 let endingGame = false
 let loseHealthPerMilliseconds = 0
+let firstTimeUnderWater = false
+let firstTimeRecoveringBreath = false
 let lastTimeNotTakingAir = 0
 let takingAir = false
 let coralSpeedAdjustment = 0
