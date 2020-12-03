@@ -1665,7 +1665,7 @@ function setNetPosition () {
 }
 function showInstructions () {
     fadeIn()
-    if (game.ask("Enter your name", "to record a high score?")) {
+    if (game.ask("To record a high score,", "please enter your name.")) {
         playerName = game.askForString("", 12)
     }
     if (playerName == "" || !(playerName)) {
