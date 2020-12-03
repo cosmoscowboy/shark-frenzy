@@ -351,7 +351,8 @@ function setPlayer () {
     hunter.setFlag(SpriteFlag.StayInScreen, true)
     hunter.setFlag(SpriteFlag.ShowPhysics, false)
     playerHealth = statusbars.create(20, 4, StatusBarKind.Health)
-    playerHealth.attachToSprite(hunter)
+    playerHealth.attachToSprite(hunter, -3 - hunter.height, 0)
+    playerHealth.z = hunter.z
     playerHealth.setFlag(SpriteFlag.Invisible, false)
     knife = sprites.create(kniveImagesRight[0], SpriteKind.Knife)
     knife.setFlag(SpriteFlag.Invisible, true)
@@ -393,6 +394,7 @@ function restart () {
     for (let value22 of sprites.allOfKind(SpriteKind.Food)) {
         value22.destroy(effects.bubbles, 500)
     }
+    nextTimeToSpawnEnemies = getNextTime(sharkSpawnTimeMin, sharkSpawnTimeMax)
     setPlayerPosition()
     setKnifePosition()
     playerHealth.value = 100
@@ -778,6 +780,7 @@ function checkBreathing () {
         }
     }
     hunter.z = hunter.y
+    playerHealth.z = hunter.z
 }
 function sharkIsHurtSet (aShark: Sprite, value: boolean) {
     sprites.setDataBoolean(aShark, sharkIsHurt, value)
@@ -1191,7 +1194,7 @@ function fadeOut () {
     color.pauseUntilFadeDone()
 }
 function setTrawlerNet () {
-    canUseNetAfterScore = 30
+    canUseNetAfterScore = 1
     canUseNet = false
     netIsDescending = false
     netHasShark = false
@@ -1645,14 +1648,13 @@ function setNetPosition () {
 }
 function showInstructions () {
     fadeIn()
-    if (game.ask("Enter your name?")) {
+    if (game.ask("Enter your name", "to record a high score?")) {
         playerName = game.askForString("", 12)
     }
     if (playerName == "" || !(playerName)) {
         playerName = "hunter"
     }
-    game.showLongText("Hello " + playerName + ".\\nThe ocean is rampant with killer sharks.", DialogLayout.Bottom)
-    game.showLongText("Use your knife to thwart those pesky carnivores.", DialogLayout.Bottom)
+    game.showLongText("Hello " + playerName + ".\\nThe ocean is rampant with killer sharks.\\n" + "Use your knife to thwart those pesky carnivores.\\n" + "Press the 'A' button (or Q on keyboard) to use your knife.", DialogLayout.Full)
     setPlayer()
     setGame()
 }
@@ -1725,6 +1727,8 @@ function setPlayerVariables () {
     facingRight = true
     dying = false
     endingGame = false
+    firstTimeUnderWater = false
+    firstTimeRecoveringBreath = false
     swimmingImagesRight = [img`
         ................................
         ................................
@@ -2030,6 +2034,8 @@ function sharkNextAttackTimeGet (aShark: Sprite) {
     return sprites.readDataNumber(aShark, sharkNextAttackTime)
 }
 let dyingImagesLeft: Image[] = []
+let firstTimeRecoveringBreath = false
+let firstTimeUnderWater = false
 let sceneIncreaseSpeed = 0
 let maxLives = 0
 let highScoresSettingValue = ""
